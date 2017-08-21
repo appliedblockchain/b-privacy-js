@@ -15,3 +15,10 @@ Package the library for release (browser/node)
 Test (TODO)
 
     npm run test
+
+
+Browser:
+
+Please require `dist/b-privacy.iife.js`, that's the browser-ready version.
+
+You also need to include `bitcore-lib` manually before that. See `test/browser.index.html` for a working example.

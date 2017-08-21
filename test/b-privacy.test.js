@@ -24,3 +24,14 @@ test('derives a mnemonic key/phrase', () => {
   expect(mnemo).not.toBeNull()
   expect(mnemo.toString().split(/\s+/).length).toBe(12) // 12 words key/phrase
 })
+
+test('derives the first private key (and address)', () => {
+  const bp = new BPrivacy({store: localStorageMock})
+  bp.deriveKey()
+  const key = bp.pvtKey
+  expect(key).not.toBeNull()
+  expect(key.toString().length).toBe(64)
+  const pubKey = bp.pubKey
+  expect(pubKey).not.toBeNull()
+  expect(pubKey.toString().length).toBe(64)
+})

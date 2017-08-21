@@ -7,7 +7,13 @@
   <body>
     <p>Naive browser loading "test" of bundled BPrivacy module</p>
 
+    <!-- FIXME: finish - try with rollup-browserify -->
     <script src="../../node_modules/bitcore-lib/bitcore-lib.js" charset="utf-8"></script>
+    <!-- <script type="text/javascript">
+      var module = {
+        exports: require('bitcore-lib'),
+      }
+    </script> -->
     <script src="../../dist/b-privacy.iife.js" charset="utf-8"></script>
     <script type="text/javascript">
 

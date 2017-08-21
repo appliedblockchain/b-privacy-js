@@ -13,11 +13,7 @@ export default [
 		format: 		'iife',
 		moduleName: 'bPrivacy',
 		plugins: [
-			resolve({
-				jsnext: true,
-      	main: true,
-      	browser: true,
-			}), // so Rollup can find included modules
+			resolve(), // so Rollup can find included modules
 			commonjs({
 			  exclude: [ 'node_modules/bitcore-lib/**' ],
 			}), // so Rollup can convert included modules to ES modules - NOTE: bitcore-lib fails the conversion and must be included manually in the browser via npm / bower before BPrivacy (this module)

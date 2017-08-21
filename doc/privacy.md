@@ -30,6 +30,7 @@ Prerequisites:
 Flow:
 
 - receives POST request
+- decrypts sharedSecret
 - encrypts sharedSecret for every node (server) address
 - calls contract function (`signedMessage, data, encryptedSecrets, addresses` + extra parameters)
 

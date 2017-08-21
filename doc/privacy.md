@@ -12,6 +12,7 @@ Prerequisites:
 Flow:
 
 - creates sharedSecret
+- encrypts sharedSecret against server public key
 - encrypts data with sharedSecret (dataEnc is returned)
 - signs message via ecccrypto (message: `"contractFunctionName, contractArguments, addresses"` - data is json payload for example serialized form data)
 - creates request to the server - passes `"message, signature"` (synchronous POST request for form submit or POST ajax call via `fetch`)

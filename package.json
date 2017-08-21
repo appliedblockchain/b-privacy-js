@@ -1,0 +1,27 @@
+{
+  "name": "b-privacy",
+  "version": "0.1.0",
+  "main": "dist/b-privacy.cjs.js",
+  "module": "dist/b-privacy.esm.js",
+  "browser": "dist/b-privacy.umd.js",
+  "dependencies": {
+    "bitcore-lib": "^0.14.0",
+    "bitcore-mnemonic": "^1.2.5",
+    "eccrypto": "^1.0.3"
+  },
+  "devDependencies": {
+    "jest": "^20.0.4",
+    "rollup": "^0.47.6",
+    "rollup-plugin-commonjs": "^8.1.0",
+    "rollup-plugin-node-resolve": "^3.0.0"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "pretest": "npm run build"
+  },
+  "files": [
+    "dist"
+  ]
+}

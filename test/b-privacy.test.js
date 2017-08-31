@@ -25,7 +25,7 @@ test('derives a mnemonic key/phrase', () => {
   expect(mnemo.toString().split(/\s+/).length).toBe(12) // 12 words key/phrase
 })
 
-test('derives the first private key (and address)', () => {
+test('derives the first private key, public key and address', () => {
   const bp = new BPrivacy({store: localStorageMock})
   bp.deriveKey()
   const key = bp.pvtKey
@@ -33,5 +33,29 @@ test('derives the first private key (and address)', () => {
   expect(key.toString().length).toBe(64)
   const pubKey = bp.pubKey
   expect(pubKey).not.toBeNull()
-  expect(pubKey.toString().length).toBe(64)
+  expect(pubKey.toString().length).toBe(66)
+  const address = bp.address
+  expect(address).not.toBeNull()
+  expect(address.toString().length).toBe(42)
+})
+
+test('signs a message', () => {
+  const bp = new BPrivacy({store: localStorageMock})
+  bp.deriveKey()
+  const signature = bp.sign("abc")
+  expect(signature).not.toBeNull()
+  expect(signature.s).not.toBeNull()
+  expect(signature.s.length).toBe(32)
+  expect(signature.r).not.toBeNull()
+  expect(signature.r.length).toBe(32)
+  expect(signature.v).not.toBeNull()
+  expect([27, 28]).toContain(signature.v)
+})
+
+test('signs a message (web3 format)', () => {
+  const bp = new BPrivacy({store: localStorageMock})
+  bp.deriveKey()
+  const signature = bp.web3Sign("abc")
+  expect(signature).not.toBeNull()
+  expect(signature.length).toBe(132)
 })

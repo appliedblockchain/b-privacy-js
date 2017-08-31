@@ -72,7 +72,7 @@ bitcore.deps._ = require('lodash');
 bitcore.Transaction.sighash = require('./lib/transaction/sighash');
 
 
-var index = Object.freeze({
+var bitcoreLib = Object.freeze({
 
 });
 
@@ -652,7 +652,7 @@ function pbkdf2(key, salt, iterations, dkLen) {
 
 var pbkdf2_1 = pbkdf2;
 
-var require$$0 = ( index && undefined ) || index;
+var require$$0 = ( bitcoreLib && undefined ) || bitcoreLib;
 
 var spec = {
   name: 'Mnemonic',
@@ -695,7 +695,7 @@ var spanish = ['ábaco', 'abdomen', 'abeja', 'abierto', 'abogado', 'abono', 'ab
 
 var spanish_1 = spanish;
 
-var index$3 = {
+var words = {
   'CHINESE': chinese_1,
   'ENGLISH': english_1,
   'FRENCH': french_1,
@@ -796,7 +796,7 @@ var Mnemonic = function(data, wordlist) {
   });
 };
 
-Mnemonic.Words = index$3;
+Mnemonic.Words = words;
 
 /**
  * Will return a boolean if the mnemonic is valid
@@ -818,10 +818,10 @@ Mnemonic.isValid = function(mnemonic, wordlist) {
     return false;
   }
 
-  var words = mnemonic.split(' ');
+  var words$$1 = mnemonic.split(' ');
   var bin = '';
-  for (var i = 0; i < words.length; i++) {
-    var ind = wordlist.indexOf(words[i]);
+  for (var i = 0; i < words$$1.length; i++) {
+    var ind = wordlist.indexOf(words$$1[i]);
     if (ind < 0) return false;
     bin = bin + ('00000000000' + ind.toString(2)).slice(-11);
   }
@@ -845,9 +845,9 @@ Mnemonic.isValid = function(mnemonic, wordlist) {
  * @returns {boolean}
  */
 Mnemonic._belongsToWordlist = function(mnemonic, wordlist) {
-  var words = unorm.nfkd(mnemonic).split(' ');
-  for (var i = 0; i < words.length; i++) {
-    var ind = wordlist.indexOf(words[i]);
+  var words$$1 = unorm.nfkd(mnemonic).split(' ');
+  for (var i = 0; i < words$$1.length; i++) {
+    var ind = wordlist.indexOf(words$$1[i]);
     if (ind < 0) return false;
   }
   return true;
@@ -999,7 +999,7 @@ Mnemonic.bitcore = require$$0;
 
 var mnemonic = Mnemonic;
 
-var index$1 = mnemonic;
+var bitcoreMnemonic = mnemonic;
 
 var Random$2 = ( random && undefined ) || random;
 
@@ -1090,8 +1090,8 @@ var BPrivacy = function () {
   }, {
     key: 'deriveMnemonic',
     value: function deriveMnemonic() {
-      var wordlist = index$1.Words.ENGLISH;
-      var mnemonicKey = index$1.fromSeed(this.hdKeySeed, wordlist);
+      var wordlist = bitcoreMnemonic.Words.ENGLISH;
+      var mnemonicKey = bitcoreMnemonic.fromSeed(this.hdKeySeed, wordlist);
       c.log(mnemonicKey);
       this.mnemonicKey = mnemonicKey;
       return mnemonicKey;

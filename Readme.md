@@ -4,20 +4,28 @@
 
 Blockchain Privacy JS library
 
-Development
+### Development
 
     npm run dev
+
+### Build
 
 Package the library for release (browser/node)
 
     npm run build
 
-Test (TODO)
+### Test
 
     npm run test
 
+or:
 
-Browser:
+    npm i -g jest
+
+    jest
+
+
+### Browser Usage
 
 Please require `dist/b-privacy.iife.js`, that's the browser-ready version.
 

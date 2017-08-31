@@ -7,26 +7,19 @@
   "dependencies": {
     "bitcore-lib": "^0.14.0",
     "bitcore-mnemonic": "^1.2.5",
-    "eccrypto": "^1.0.3",
-    "elliptic": "^6.4.0",
     "ethereum-bip44": "git+https://github.com/appliedblockchain/ethereum-bip44.git#update-bitcore-lib",
     "ethereumjs-util": "^5.1.2"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-es2015": "^6.24.1",
+    "bubleify": "^0.7.0",
     "jest": "^20.0.4",
-    "rollup": "^0.47.6",
-    "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-commonjs": "^8.1.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "watchify": "^3.9.0"
   },
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "test": "jest",
-    "pretest": "npm run build"
+    "build":    "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "dev":      "watchify   src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "test":     "jest",
+    "pretest":  "npm run build"
   },
   "files": [
     "dist"

@@ -7,6 +7,7 @@
   "dependencies": {
     "bitcore-lib": "^0.14.0",
     "bitcore-mnemonic": "^1.2.5",
+    "crypto": "^1.0.1",
     "ethereum-bip44": "git+https://github.com/appliedblockchain/ethereum-bip44.git#update-bitcore-lib",
     "ethereumjs-util": "^5.1.2"
   },
@@ -16,10 +17,10 @@
     "watchify": "^3.9.0"
   },
   "scripts": {
-    "build":    "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
-    "dev":      "watchify   src/b-privacy.js -o dist/b-privacy.js -t bubleify",
-    "test":     "jest",
-    "pretest":  "npm run build"
+    "build": "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "dev": "watchify   src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "test": "jest",
+    "pretest": "npm run build"
   },
   "files": [
     "dist"

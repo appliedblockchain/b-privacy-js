@@ -1,4 +1,6 @@
 const c = console
+const crypto        = require("crypto")
+const AES           = "aes-256-ctr"
 const bitcore       = require('bitcore-lib')
 const HDPrivateKey  = bitcore.HDPrivateKey
 const PrivateKey    = bitcore.PrivateKey
@@ -97,6 +99,44 @@ class BPrivacy {
     const s = signature.s.toString('hex')
     const v = Buffer.from([signature.v]).toString('hex')
     return `0x${r}${s}${v}`
+  }
+
+  genSharedSecret() {
+    return crypto.randomBytes(32)
+  }
+
+  genIv() {
+    return crypto.randomBytes(16)
+  }
+
+  encrypt(dataBuffer) {
+    const sharedSecret = this.genSharedSecret()
+    const iv = this.genIv()
+    const cipher = crypto.createCipheriv(AES, sharedSecret, iv)
+    let encrypted = cipher.update(dataBuffer, 'utf-8', 'base64')
+    encrypted += cipher.final('base64')
+    return {
+      dataEnc: encrypted,
+      iv: iv,
+    }
+  }
+
+  encryptAndSign({publicData, privateData, readerAddresses}) {
+    const privateDataEnc = this.encrypt(privateData)
+
+    let readers = [this.address]
+    readers.concat(readerAddresses)
+
+    const message = `${publicData}${privateDataEnc.dataEnc}${privateDataEnc.iv}${readers.join('')}`
+    const signature = this.sign(message)
+
+    return {
+      publicData: publicData,
+      privateData: privateDataEnc.dataEnc,
+      iv: privateDataEnc.iv,
+      readers: readers,
+      signature: signature,
+    }
   }
 
   // private

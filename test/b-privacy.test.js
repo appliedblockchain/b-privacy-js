@@ -52,41 +52,9 @@ test('signs a message', () => {
   expect([27, 28]).toContain(signature.v)
 })
 
-test('signs a message (web3 format)', () => {
+test("exposes sha3", () => {
   const bp = new BPrivacy({store: localStorageMock})
-  bp.deriveKey()
-  const signature = bp.web3Sign("abc")
-  expect(signature).toBeDefined()
-  expect(signature).toHaveLength(132)
-})
-
-test('encrypts and sign data', () => {
-  const bp = new BPrivacy({store: localStorageMock})
-  bp.deriveKey()
-  const publicData  = JSON.stringify({ public: true })
-  const privateData = JSON.stringify({ private: true })
-  const readerAddresses = []
-  const data = bp.encryptAndSign({
-    publicData: publicData,
-    privateData: privateData,
-    readerAddresses: readerAddresses,
-  })
-  expect(data.publicData).toBeDefined()
-  expect(data.publicData).toBe(publicData)
-  expect(data.privateData).toBeDefined()
-  expect(data.privateData).not.toBe(privateData)
-  expect(data.privateData).toHaveLength(24)
-  expect(data.privateData.substr(-2)).toBe("==")
-  expect(data.iv).toBeDefined()
-  expect(data.iv).toHaveLength(16)
-  expect(data.readers).toBeDefined()
-  expect(data.readers).toContain(bp.address)
-  expect(data.readers).toHaveLength(1)
-  expect(data.signature).toBeDefined()
-  expect(data.signature.s).toBeDefined()
-  expect(data.signature.s).toHaveLength(32)
-  expect(data.signature.r).toBeDefined()
-  expect(data.signature.r).toHaveLength(32)
-  expect(data.signature.v).toBeDefined()
-  expect([27, 28]).toContain(data.signature.v)
+  const hash = bp.sha3("message123")
+  expect(hash).toHaveLength(64)
+  expect(hash).toBe("d860e63c5c69590c1a3184336cafdcd5ea84111b78268e71ed9a623d45be37fa")
 })

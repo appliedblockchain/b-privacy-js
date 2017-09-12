@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>BPrivacy loading test</title>
+  </head>
+  <body>
+    <p>Naive browser loading "test" of bundled BPrivacy module</p>
+
+    <script src="../../dist/b-privacy.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      const c = console
+      const bp = new BPrivacy({})
+      bp.deriveKey()
+      c.log(bp.pvtKey.toString())
+      c.log(bp.web3Sign("abc"))
+    </script>
+  </body>
+</html>

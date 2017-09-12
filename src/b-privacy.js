@@ -62,23 +62,23 @@ class BPrivacy {
 
   // derive first private key
   deriveKey() {
-    const account  = 0    // we leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for now as we just increase the address index for now
-    const index    = 0    // starts at zero - we will increment the address index for every key the user needs
-    const coinType = 7160 // TODO: this needs to be discussed and changed so that this library is configured with a different coin type for every app we build (example 7160 for cygnetise, 7161 for cygnetise-staging, 7162 for sita, etc...)
-    const pathLevel = `44'/${coinType}'/${account}'` // *note2
-    const derived   = this.hdKey.derive(`m/${pathLevel}/${index}`)
-    const pvtKey    = derived.privateKey
+    const account  = 0  // we leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for now as we just increase the address index for now
+    const index    = 0  // starts at zero - we will increment the address index for every key the user needs
+    const coinType = 60 // 60 - ethereum - *note4
+    const change   = 0 // 0 - false - private address
+    const pathLevel = `44'/${coinType}'/${account}'/${change}` // *note2
+    const derivedChild = this.hdKey.derive(`m/${pathLevel}/${index}`)
+    const pvtKey    = derivedChild.privateKey
     this.pvtKey     = pvtKey
     this.pubKey     = pvtKey.publicKey
-    this.addressBtc = pvtKey.toAddress()
     this.keyIndex   = index
-    this.deriveEthereumAddress({hdPubKey: derived.hdPublicKey})
+    this.deriveEthereumAddress()
     return pvtKey
   }
 
-  deriveEthereumAddress({hdPubKey}) {
-    const wallet = EthereumBip44.fromPublicSeed(hdPubKey.toString())
-    const address = wallet.getAddress(this.keyIndex)
+  deriveEthereumAddress() {
+    const eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
+    const address = eBip44.getAddress(this.keyIndex)
     this.address = address
     return
   }
@@ -121,3 +121,7 @@ if (process.browser) window.BPrivacy = BPrivacy
 
 // *note2: this constructs a mnemonic path level - here are some infos on path levels: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#path-levels - note we skip the change address bit as we don't usually deal with native chain tokens (test-eths) as we run PoA as consensus algo
 // and here's the list of registered coin types: https://github.com/satoshilabs/slips/blob/master/slip-0044.md#registered-coin-types
+
+// note3: this is the derived parent key (w/o index): this.hdKey.derive(`m/${pathLevel}`)
+
+// *note4: TODO: this needs to be configurable so that this library is configured with a different coin type for every app we build (example 7160 for cygnetise, 7161 for cygnetise-staging, 7162 for sita, etc...)

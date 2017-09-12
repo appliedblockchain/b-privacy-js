@@ -20945,7 +20945,13 @@ exports.shr64_lo = shr64_lo;
 
 },{"inherits":87}],86:[function(require,module,exports){
 module.exports={
-  "_from": "elliptic@=3.0.3",
+  "_args": [
+    [
+      "elliptic@3.0.3",
+      "/home/makevoid/apps/b-privacy-js"
+    ]
+  ],
+  "_from": "elliptic@3.0.3",
   "_id": "elliptic@3.0.3",
   "_inBundle": false,
   "_integrity": "sha1-hlybQgv75VAGuflp+XoNLESWZZU=",
@@ -20967,9 +20973,8 @@ module.exports={
     "/bitcore-lib"
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
-  "_shasum": "865c9b420bfbe55006b9f969f97a0d2c44966595",
-  "_spec": "elliptic@3.0.3",
-  "_where": "/Users/makevoid/apps/b-privacy-js/node_modules/bitcore-lib",
+  "_spec": "3.0.3",
+  "_where": "/home/makevoid/apps/b-privacy-js",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -20977,14 +20982,12 @@ module.exports={
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
     "bn.js": "^2.0.0",
     "brorand": "^1.0.1",
     "hash.js": "^1.0.0",
     "inherits": "^2.0.1"
   },
-  "deprecated": false,
   "description": "EC cryptography",
   "devDependencies": {
     "browserify": "^3.44.2",
@@ -33395,78 +33398,35 @@ if (typeof Object.create === 'function') {
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],89:[function(require,module,exports){
 module.exports={
-  "_from": "bitcore-lib@^0.14.0",
+  "_args": [
+    [
+      "bitcore-lib@0.14.0",
+      "/home/makevoid/apps/b-privacy-js"
+    ]
+  ],
+  "_from": "bitcore-lib@0.14.0",
   "_id": "bitcore-lib@0.14.0",
   "_inBundle": false,
   "_integrity": "sha1-IcsjWf57mXo7e3c+t9cnWuN9ZE4=",
   "_location": "/bitcore-lib",
   "_phantomChildren": {},
   "_requested": {
-    "type": "range",
+    "type": "version",
     "registry": true,
-    "raw": "bitcore-lib@^0.14.0",
+    "raw": "bitcore-lib@0.14.0",
     "name": "bitcore-lib",
     "escapedName": "bitcore-lib",
-    "rawSpec": "^0.14.0",
+    "rawSpec": "0.14.0",
     "saveSpec": null,
-    "fetchSpec": "^0.14.0"
+    "fetchSpec": "0.14.0"
   },
   "_requiredBy": [
     "/",
     "/bitcore-mnemonic"
   ],
   "_resolved": "https://registry.npmjs.org/bitcore-lib/-/bitcore-lib-0.14.0.tgz",
-  "_shasum": "21cb2359fe7b997a3b7b773eb7d7275ae37d644e",
-  "_shrinkwrap": {
-    "name": "bitcore",
-    "version": "0.13.19",
-    "dependencies": {
-      "bn.js": {
-        "version": "2.0.4",
-        "from": "bn.js@=2.0.4",
-        "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.0.4.tgz"
-      },
-      "bs58": {
-        "version": "2.0.0",
-        "from": "bs58@=2.0.0",
-        "resolved": "https://registry.npmjs.org/bs58/-/bs58-2.0.0.tgz"
-      },
-      "buffer-compare": {
-        "version": "1.0.0",
-        "from": "buffer-compare@=1.0.0",
-        "resolved": "https://registry.npmjs.org/buffer-compare/-/buffer-compare-1.0.0.tgz"
-      },
-      "elliptic": {
-        "version": "3.0.3",
-        "from": "elliptic@=3.0.3",
-        "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
-        "dependencies": {
-          "brorand": {
-            "version": "1.0.5",
-            "from": "brorand@^1.0.1",
-            "resolved": "https://registry.npmjs.org/brorand/-/brorand-1.0.5.tgz"
-          },
-          "hash.js": {
-            "version": "1.0.3",
-            "from": "hash.js@=1.0.3",
-            "resolved": "https://registry.npmjs.org/hash.js/-/hash.js-1.0.3.tgz"
-          }
-        }
-      },
-      "inherits": {
-        "version": "2.0.1",
-        "from": "inherits@=2.0.1",
-        "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
-      },
-      "lodash": {
-        "version": "3.10.1",
-        "from": "lodash@=3.10.1",
-        "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz"
-      }
-    }
-  },
-  "_spec": "bitcore-lib@^0.14.0",
-  "_where": "/Users/makevoid/apps/b-privacy-js",
+  "_spec": "0.14.0",
+  "_where": "/home/makevoid/apps/b-privacy-js",
   "author": {
     "name": "BitPay",
     "email": "dev@bitpay.com"
@@ -33477,7 +33437,6 @@ module.exports={
   "bugs": {
     "url": "https://github.com/bitpay/bitcore-lib/issues"
   },
-  "bundleDependencies": false,
   "contributors": [
     {
       "name": "Daniel Cousens",
@@ -33532,7 +33491,6 @@ module.exports={
     "inherits": "=2.0.1",
     "lodash": "=3.10.1"
   },
-  "deprecated": false,
   "description": "A pure and powerful JavaScript Bitcoin library.",
   "devDependencies": {
     "bitcore-build": "github:bitpay/bitcore-build",
@@ -46354,31 +46312,34 @@ utils.intFromLE = intFromLE;
 
 },{"bn.js":102,"minimalistic-assert":222,"minimalistic-crypto-utils":223}],167:[function(require,module,exports){
 module.exports={
-  "_from": "elliptic",
+  "_args": [
+    [
+      "elliptic@6.4.0",
+      "/home/makevoid/apps/b-privacy-js"
+    ]
+  ],
+  "_from": "elliptic@6.4.0",
   "_id": "elliptic@6.4.0",
   "_inBundle": false,
   "_integrity": "sha1-ysmvh2LIWDYYcAPI3+GT5eLq5d8=",
   "_location": "/elliptic",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "version",
     "registry": true,
-    "raw": "elliptic",
+    "raw": "elliptic@6.4.0",
     "name": "elliptic",
     "escapedName": "elliptic",
-    "rawSpec": "",
+    "rawSpec": "6.4.0",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "6.4.0"
   },
   "_requiredBy": [
-    "#USER",
-    "/",
     "/secp256k1"
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
-  "_shasum": "cac9af8762c85836187003c8dfe193e5e2eae5df",
-  "_spec": "elliptic",
-  "_where": "/Users/makevoid/apps/b-privacy-js",
+  "_spec": "6.4.0",
+  "_where": "/home/makevoid/apps/b-privacy-js",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -46386,7 +46347,6 @@ module.exports={
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
     "bn.js": "^4.4.0",
     "brorand": "^1.0.1",
@@ -46396,7 +46356,6 @@ module.exports={
     "minimalistic-assert": "^1.0.0",
     "minimalistic-crypto-utils": "^1.0.0"
   },
-  "deprecated": false,
   "description": "EC cryptography",
   "devDependencies": {
     "brfs": "^1.4.3",
@@ -49324,7 +49283,7 @@ module.exports={
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.2.3.tgz",
   "_shasum": "18e46d7306b0951275a2d42063270a14b74ebe99",
   "_spec": "elliptic@6.2.3",
-  "_where": "/Users/makevoid/apps/b-privacy-js/node_modules/ethereum-bip44",
+  "_where": "/home/makevoid/apps/b-privacy-js/node_modules/ethereum-bip44",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -62383,25 +62342,23 @@ BPrivacy.prototype.deriveMnemonic = function deriveMnemonic () {
 
 // derive first private key
 BPrivacy.prototype.deriveKey = function deriveKey () {
-  var account= 0  // we leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for now as we just increase the address index for now
-  var index  = 0  // starts at zero - we will increment the address index for every key the user needs
-  var coinType = 7160 // TODO: this needs to be discussed and changed so that this library is configured with a different coin type for every app we build (example 7160 for cygnetise, 7161 for cygnetise-staging, 7162 for sita, etc...)
-  var pathLevel = "44'/" + coinType + "'/" + account + "'" // *note2
-  var derived = this.hdKey.derive(("m/" + pathLevel + "/" + index))
-  var pvtKey  = derived.privateKey
+  var account= 0// we leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for now as we just increase the address index for now
+  var index  = 0// starts at zero - we will increment the address index for every key the user needs
+  var coinType = 60 // 60 - ethereum - *note4
+  var change = 0 // 0 - false - private address
+  var pathLevel = "44'/" + coinType + "'/" + account + "'/" + change // *note2
+  var derivedChild = this.hdKey.derive(("m/" + pathLevel + "/" + index))
+  var pvtKey  = derivedChild.privateKey
   this.pvtKey   = pvtKey
   this.pubKey   = pvtKey.publicKey
-  this.addressBtc = pvtKey.toAddress()
   this.keyIndex = index
-  this.deriveEthereumAddress({hdPubKey: derived.hdPublicKey})
+  this.deriveEthereumAddress()
   return pvtKey
 };
 
-BPrivacy.prototype.deriveEthereumAddress = function deriveEthereumAddress (ref) {
-    var hdPubKey = ref.hdPubKey;
-
-  var wallet = EthereumBip44.fromPublicSeed(hdPubKey.toString())
-  var address = wallet.getAddress(this.keyIndex)
+BPrivacy.prototype.deriveEthereumAddress = function deriveEthereumAddress () {
+  var eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
+  var address = eBip44.getAddress(this.keyIndex)
   this.address = address
   return
 };
@@ -62442,6 +62399,10 @@ if (process.browser) { window.BPrivacy = BPrivacy }
 
 // *note2: this constructs a mnemonic path level - here are some infos on path levels: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#path-levels - note we skip the change address bit as we don't usually deal with native chain tokens (test-eths) as we run PoA as consensus algo
 // and here's the list of registered coin types: https://github.com/satoshilabs/slips/blob/master/slip-0044.md#registered-coin-types
+
+// note3: this is the derived parent key (w/o index): this.hdKey.derive(`m/${pathLevel}`)
+
+// *note4: TODO: this needs to be configurable so that this library is configured with a different coin type for every app we build (example 7160 for cygnetise, 7161 for cygnetise-staging, 7162 for sita, etc...)
 
 }).call(this,require('_process'),require("buffer").Buffer)
 },{"_process":235,"bitcore-lib":18,"bitcore-lib/lib/crypto/random":28,"bitcore-mnemonic":90,"buffer":132,"ethereum-bip44/es5":168,"ethereumjs-util":187}]},{},[287]);

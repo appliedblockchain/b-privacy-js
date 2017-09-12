@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
-    "dev": "watchify   src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "dev": "watchify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
     "test": "jest",
     "pretest": "npm run build"
   },

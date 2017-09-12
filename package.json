@@ -1,0 +1,28 @@
+{
+  "name": "b-privacy",
+  "version": "0.1.0",
+  "main": "dist/b-privacy.cjs.js",
+  "module": "dist/b-privacy.esm.js",
+  "browser": "dist/b-privacy.iife.js",
+  "dependencies": {
+    "bitcore-lib": "^0.14.0",
+    "bitcore-mnemonic": "^1.2.5",
+    "crypto": "^1.0.1",
+    "ethereum-bip44": "git+https://github.com/appliedblockchain/ethereum-bip44.git#update-bitcore-lib",
+    "ethereumjs-util": "^5.1.2"
+  },
+  "devDependencies": {
+    "bubleify": "^0.7.0",
+    "jest": "^20.0.4",
+    "watchify": "^3.9.0"
+  },
+  "scripts": {
+    "build": "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "dev": "watchify   src/b-privacy.js -o dist/b-privacy.js -t bubleify",
+    "test": "jest",
+    "pretest": "npm run build"
+  },
+  "files": [
+    "dist"
+  ]
+}

@@ -37,8 +37,8 @@ class BPrivacy {
   }
 
   generateHDKey() {
-    this.p("Gen key")
-    const hdKeySeed = Random.getRandomBuffer(16) // *note1
+    this._p("Gen key")
+    const hdKeySeed = Random.getRandomBuffer(16) // *note1 (find all notes in doc/notes.md)
     const hdKey = HDPrivateKey.fromSeed(hdKeySeed)
     this.store.ab_hd_private_key_seed = hdKeySeed.toString("hex")
     this.hdKeySeed  = hdKeySeed
@@ -46,7 +46,7 @@ class BPrivacy {
   }
 
   loadHdKey() {
-    this.p("Load key")
+    this._p("Load key")
     const hdKeySeed = new Buffer(this.store.ab_hd_private_key_seed, "hex")
     const hdKey = HDPrivateKey.fromSeed(hdKeySeed)
     this.hdKeySeed = hdKeySeed
@@ -103,16 +103,13 @@ class BPrivacy {
     return util.sha3(string).toString("hex")
   }
 
-  // private
-
-  p(message) {
+  _p(message) {
     if (this.log) c.log(message.toString())
   }
 
 }
 
-
 module.exports = BPrivacy
 
-
+// export module as global when loaded in browser environment
 if (process.browser) window.BPrivacy = BPrivacy

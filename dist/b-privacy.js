@@ -62278,13 +62278,13 @@ exports.createContext = Script.createContext = function (context) {
 },{"indexof":206}],287:[function(require,module,exports){
 (function (process,Buffer){
 var c = console
-var bitcore       = require('bitcore-lib')
-var HDPrivateKey  = bitcore.HDPrivateKey
-var PrivateKey    = bitcore.PrivateKey
-var Random        = require('bitcore-lib/lib/crypto/random')
-var Mnemonic      = require('bitcore-mnemonic')
+var bitcore = require('bitcore-lib')
+var HDPrivateKey = bitcore.HDPrivateKey
+var PrivateKey = bitcore.PrivateKey
+var Random = require('bitcore-lib/lib/crypto/random')
+var Mnemonic = require('bitcore-mnemonic')
 var EthereumBip44 = require('ethereum-bip44/es5')
-var util          = require('ethereumjs-util')
+var util = require('ethereumjs-util')
 
 var BPrivacy = function BPrivacy(ref) {
   var store = ref.store; if ( store === void 0 ) store = localStorage;
@@ -62293,16 +62293,16 @@ var BPrivacy = function BPrivacy(ref) {
   // logging - change to `this.log = true/false` to enable/suppress logs
   this.log = false
   // defines whether we're running in the browser or on a mobile environment (React-Native)
-  this.isBrowser= isBrowser
-  this.store      = store
+  this.isBrowser = isBrowser
+  this.store = store
   // all instance variables/attributes (for reference)
-  this.hdKeySeed  = null
-  this.hdKey      = null
-  this.mnemonicKey= null
-  this.pvtKey     = null
-  this.pubKey     = null
-  this.address    = null
-  this.keyIndex   = null
+  this.hdKeySeed = null
+  this.hdKey = null
+  this.mnemonicKey = null
+  this.keyIdx = null
+  this.pvtKey = null
+  this.pubKey = null
+  this.address = null
 
   this.setupHDKey()
 };
@@ -62317,24 +62317,24 @@ BPrivacy.prototype.setupHDKey = function setupHDKey () {
 };
 
 BPrivacy.prototype.generateHDKey = function generateHDKey () {
-  this.p("Gen key")
-  var hdKeySeed = Random.getRandomBuffer(16) // *note1
+  this._p("Gen key")
+  var hdKeySeed = Random.getRandomBuffer(16) // *note1 (find all notes in doc/notes.md)
   var hdKey = HDPrivateKey.fromSeed(hdKeySeed)
   this.store.ab_hd_private_key_seed = hdKeySeed.toString("hex")
   this.hdKeySeed= hdKeySeed
-  this.hdKey    = hdKey
+  this.hdKey = hdKey
 };
 
 BPrivacy.prototype.loadHdKey = function loadHdKey () {
-  this.p("Load key")
+  this._p("Load key")
   var hdKeySeed = new Buffer(this.store.ab_hd_private_key_seed, "hex")
-  var hdKey   = HDPrivateKey.fromSeed(hdKeySeed)
-  this.hdKeySeed= hdKeySeed
-  this.hdKey    = hdKey
+  var hdKey = HDPrivateKey.fromSeed(hdKeySeed)
+  this.hdKeySeed = hdKeySeed
+  this.hdKey = hdKey
 };
 
 BPrivacy.prototype.deriveMnemonic = function deriveMnemonic () {
-  var wordlist  = Mnemonic.Words.ENGLISH
+  var wordlist = Mnemonic.Words.ENGLISH
   var mnemonicKey = Mnemonic.fromSeed(this.hdKeySeed, wordlist)
   this.mnemonicKey = mnemonicKey
   return mnemonicKey
@@ -62342,23 +62342,23 @@ BPrivacy.prototype.deriveMnemonic = function deriveMnemonic () {
 
 // derive first private key
 BPrivacy.prototype.deriveKey = function deriveKey () {
-  var account= 0// we leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for now as we just increase the address index for now
-  var index  = 0// starts at zero - we will increment the address index for every key the user needs
+  var account = 0// we leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for now as we just increase the address index for now
+  var index = 0// starts at zero - we will increment the address index for every key the user needs
   var coinType = 60 // 60 - ethereum - *note4
   var change = 0 // 0 - false - private address
   var pathLevel = "44'/" + coinType + "'/" + account + "'/" + change // *note2
   var derivedChild = this.hdKey.derive(("m/" + pathLevel + "/" + index))
-  var pvtKey  = derivedChild.privateKey
-  this.pvtKey   = pvtKey
-  this.pubKey   = pvtKey.publicKey
-  this.keyIndex = index
+  var pvtKey = derivedChild.privateKey
+  this.pvtKey = pvtKey
+  this.pubKey = pvtKey.publicKey
+  this.keyIdx = index
   this.deriveEthereumAddress()
   return pvtKey
 };
 
 BPrivacy.prototype.deriveEthereumAddress = function deriveEthereumAddress () {
   var eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
-  var address = eBip44.getAddress(this.keyIndex)
+  var address = eBip44.getAddress(this.keyIdx)
   this.address = address
   return
 };
@@ -62383,26 +62383,14 @@ BPrivacy.prototype.sha3 = function sha3 (string) {
   return util.sha3(string).toString("hex")
 };
 
-// private
-
-BPrivacy.prototype.p = function p (message) {
+BPrivacy.prototype._p = function _p (message) {
   if (this.log) { c.log(message.toString()) }
 };
 
-
 module.exports = BPrivacy
 
-
+// export module as global when loaded in browser environment
 if (process.browser) { window.BPrivacy = BPrivacy }
-
-// *note1: 16 bytes (128 bits) seed for a 12 words seed - note: a value higher than that doesn't provides additional security because 256 bit keys of bitcoin are only 128 bits strong
-
-// *note2: this constructs a mnemonic path level - here are some infos on path levels: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#path-levels - note we skip the change address bit as we don't usually deal with native chain tokens (test-eths) as we run PoA as consensus algo
-// and here's the list of registered coin types: https://github.com/satoshilabs/slips/blob/master/slip-0044.md#registered-coin-types
-
-// note3: this is the derived parent key (w/o index): this.hdKey.derive(`m/${pathLevel}`)
-
-// *note4: TODO: this needs to be configurable so that this library is configured with a different coin type for every app we build (example 7160 for cygnetise, 7161 for cygnetise-staging, 7162 for sita, etc...)
 
 }).call(this,require('_process'),require("buffer").Buffer)
 },{"_process":235,"bitcore-lib":18,"bitcore-lib/lib/crypto/random":28,"bitcore-mnemonic":90,"buffer":132,"ethereum-bip44/es5":168,"ethereumjs-util":187}]},{},[287]);

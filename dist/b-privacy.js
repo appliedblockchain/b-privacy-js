@@ -62350,25 +62350,22 @@ var BPrivacy = function BPrivacy(ref) {
 BPrivacy.prototype.setupHDKey = function setupHDKey () {
   var mnemonic = this.store.ab_hd_private_key_mnemonic
   if (!mnemonic || mnemonic == "") {
-    this.generateHDKey()
+    this.generateMnemonic()
     this.deriveMnemonic()
-    this.store.ab_hd_private_key_mnemonic = mnemonic
   } else {
     this.deriveMnemonic()
   }
 };
 
-BPrivacy.prototype.generateHDKey = function generateHDKey () {
+BPrivacy.prototype.generateMnemonic = function generateMnemonic () {
   this._p("Gen key")
-  var hdKeySeed = Random.getRandomBuffer(16) // *note1 (find all notes in doc/notes.md)
-  var hdKey = HDPrivateKey.fromSeed(hdKeySeed)
-  this.hdKey = hdKey
+  var mnemonic = new Mnemonic()
+  this.store.ab_hd_private_key_mnemonic = mnemonic.phrase
 };
 
 BPrivacy.prototype.deriveMnemonic = function deriveMnemonic () {
   var wordlist = Mnemonic.Words.ENGLISH
-  var mnemonicKeyString = Buffer.from(this.store.ab_hd_private_key_mnemonic, "utf-8")
-  var mnemonicKey = Mnemonic.fromSeed(mnemonicKeyString, wordlist)
+  var mnemonicKey = new Mnemonic(this.store.ab_hd_private_key_mnemonic, wordlist)
   this.mnemonicKey = mnemonicKey
   var hdKey = mnemonicKey.toHDPrivateKey()
   this.hdKey = hdKey

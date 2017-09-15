@@ -1,26 +1,28 @@
 const c = console
 const BPrivacy = require('../src/b-privacy.js')
 const localStorageMock = {}
-let hdKeySeedTmp
+let mnemonicTmp
+
+const examplePhrase = "aspect else project orient seed doll admit remind library turkey dutch inhale"
 
 test('initializes', () => {
   const bp = new BPrivacy({store: localStorageMock})
   expect(bp.isBrowser).toBe(true)
-  hdKeySeedTmp = bp.hdKeySeed.toString()
+  mnemonicTmp = bp.mnemonicKey.phrase
 })
 
 test('generates and saves hd key', () => {
   const bp = new BPrivacy({store: localStorageMock})
-  const hdKeySeed = new Buffer(localStorageMock.ab_hd_private_key_seed, "hex").toString()
-  expect(hdKeySeed).toBeDefined()
-  expect(typeof hdKeySeed).toBe("string")
-  expect(hdKeySeed).toBe(hdKeySeedTmp)
+  const mnemonic = localStorageMock.ab_hd_private_key_mnemonic
+  expect(mnemonic).toBeDefined()
+  expect(typeof mnemonic).toBe("string")
+  expect(mnemonic).toBe(mnemonicTmp)
 })
 
 test('derives a mnemonic key/phrase', () => {
   const bp = new BPrivacy({store: localStorageMock})
   bp.deriveMnemonic()
-  const mnemo = bp.mnemonicKey
+  const mnemo = bp.mnemonicKey.phrase
   expect(mnemo).toBeDefined()
   expect(mnemo.toString().split(/\s+/)).toHaveLength(12) // 12 words key/phrase
 })
@@ -62,16 +64,16 @@ test("exposes sha3", () => {
 })
 
 test('derives the correct address (at index 0)', () => {
-  const store = { ab_hd_private_key_seed: 'f9c7d9579493633c068f16f769704db6' }
+  const store = { ab_hd_private_key_mnemonic: examplePhrase }
   const bp = new BPrivacy({store: store})
   bp.deriveKey()
   const address = bp.address
   expect(address).toBeDefined()
-  expect(address.toString()).toBe("0xfc86f571353e44568aa9103db4edd7f53a410c73")
+  expect(address.toString()).toBe("0xfdc7867dac261b3ee47fcd00b4f94a525ff5db1c")
 })
 
 test('signs a message via web3Sign', () => {
-  const store = { ab_hd_private_key_seed: 'f9c7d9579493633c068f16f769704db6' }
+  const store = { ab_hd_private_key_mnemonic: examplePhrase }
   const bp = new BPrivacy({store: store})
   bp.deriveKey()
   const message = "a"

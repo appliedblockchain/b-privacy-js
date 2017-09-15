@@ -16,7 +16,6 @@ class BPrivacy {
     this.isBrowser = isBrowser
     this.store = store
     // all instance variables/attributes (for reference)
-    this.hdKeySeed = null
     this.hdKey = null
     this.mnemonicKey = null
     this.keyIdx = null
@@ -28,35 +27,27 @@ class BPrivacy {
   }
 
   setupHDKey() {
-    const hdKeySeed = this.store.ab_hd_private_key_seed
-    if (!hdKeySeed || hdKeySeed == "") {
-      this.generateHDKey()
+    const mnemonic = this.store.ab_hd_private_key_mnemonic
+    if (!mnemonic || mnemonic == "") {
+      this.generateMnemonic()
+      this.deriveMnemonic()
     } else {
-      this.loadHdKey()
+      this.deriveMnemonic()
     }
   }
 
-  generateHDKey() {
+  generateMnemonic() {
     this._p("Gen key")
-    const hdKeySeed = Random.getRandomBuffer(16) // *note1 (find all notes in doc/notes.md)
-    const hdKey = HDPrivateKey.fromSeed(hdKeySeed)
-    this.store.ab_hd_private_key_seed = hdKeySeed.toString("hex")
-    this.hdKeySeed  = hdKeySeed
-    this.hdKey = hdKey
-  }
-
-  loadHdKey() {
-    this._p("Load key")
-    const hdKeySeed = new Buffer(this.store.ab_hd_private_key_seed, "hex")
-    const hdKey = HDPrivateKey.fromSeed(hdKeySeed)
-    this.hdKeySeed = hdKeySeed
-    this.hdKey = hdKey
+    const mnemonic = new Mnemonic()
+    this.store.ab_hd_private_key_mnemonic = mnemonic.phrase
   }
 
   deriveMnemonic() {
     const wordlist = Mnemonic.Words.ENGLISH
-    const mnemonicKey = Mnemonic.fromSeed(this.hdKeySeed, wordlist)
+    const mnemonicKey = new Mnemonic(this.store.ab_hd_private_key_mnemonic, wordlist)
     this.mnemonicKey = mnemonicKey
+    const hdKey = mnemonicKey.toHDPrivateKey()
+    this.hdKey = hdKey
     return mnemonicKey
   }
 

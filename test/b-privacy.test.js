@@ -19,6 +19,26 @@ test('generates and saves hd key', () => {
   expect(mnemonic).toBe(mnemonicTmp)
 })
 
+test('is able to set mnemonic phrase', () => {
+  const bp = new BPrivacy({store: localStorageMock})
+  var testMnemonic = "must flavor egg talk forward replace since ankle knife equal idea spin";
+  bp.setMnemonic(testMnemonic);
+  expect(localStorageMock.ab_hd_private_key_mnemonic).toBeDefined();
+  expect(localStorageMock.ab_hd_private_key_mnemonic).toBe(testMnemonic);
+});
+
+test('throws error when mnemonic phrase is invalid', () => {
+  const bp = new BPrivacy({store: localStorageMock})
+  var testInvalidMnemonic = "copper explain illfated truck neat unite branch educated tenuous hum decisive notice";
+  var threwError = false;
+  try {
+    bp.setMnemonic(testInvalidMnemonic)
+  } catch (e){
+    threwError = true;
+  }
+  expect(threwError).toBe(true);
+});
+
 test('derives a mnemonic key/phrase', () => {
   const bp = new BPrivacy({store: localStorageMock})
   bp.deriveMnemonic()

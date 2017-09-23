@@ -26,6 +26,7 @@ class BPrivacy {
     this.setupHDKey()
   }
 
+
   setupHDKey() {
     const mnemonic = this.store.ab_hd_private_key_mnemonic
     if (!mnemonic || mnemonic == "") {
@@ -40,6 +41,14 @@ class BPrivacy {
     this._p("Gen key")
     const mnemonic = new Mnemonic()
     this.store.ab_hd_private_key_mnemonic = mnemonic.phrase
+  }
+
+  setMnemonic(mnemonicText) {
+    if (Mnemonic.isValid(mnemonicText, Mnemonic.Words.ENGLISH)){
+      this.store.ab_hd_private_key_mnemonic = mnemonicText
+    } else{
+      throw new Error('invalid mnemonic phrase')
+    }
   }
 
   deriveMnemonic() {

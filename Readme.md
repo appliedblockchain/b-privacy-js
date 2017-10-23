@@ -4,7 +4,7 @@
 
 Blockchain Privacy JS library
 
-Provides an easy way to interact with keys and sign messages (note: storage fo keys should be handled outside this library)
+Provides an easy way to interact with keys and sign messages (note: storage of keys should be handled outside this library)
 
 ### Development
 

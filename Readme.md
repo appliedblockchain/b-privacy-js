@@ -49,6 +49,6 @@ var phrase = BPrivacy.generateMnemonicPhrase(); // "monkey flip moral arrow cann
 var bp = new BPrivacy({mnemonic: phrase});
 bp.address // "0xe0717674db78370b93af791216c8bbbd871a9091"
 bp.pubKey.toString(); // "030b98a725efa7378398067c79e5d67f6a068dcb2b9ca36f4a19b3557c34955de6"
-bp.pvtKey.toString(); // bp.pvtKey.toString();
+bp.pvtKey.toString(); // "ce2d46332c210aae80bffb88df33466b670705b0d244c99cdb235c190d05aa15"
 signed_message = bp.sign("abc") // {r: Uint8Array(32), s: Uint8Array(32), v: 27}
 ```

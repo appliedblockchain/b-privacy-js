@@ -5,50 +5,47 @@ let mnemonicTmp
 
 const examplePhrase = "aspect else project orient seed doll admit remind library turkey dutch inhale"
 
-test('initializes', () => {
-  const bp = new BPrivacy({store: localStorageMock})
+test('initializes when given a valid mnemonic', () => {
+  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
+  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
   expect(bp.isBrowser).toBe(true)
-  mnemonicTmp = bp.mnemonicKey.phrase
+  expect(bp.mnemonicKey.phrase).toEqual(mnemonicPhrase)
 })
 
-test('generates and saves hd key', () => {
-  const bp = new BPrivacy({store: localStorageMock})
-  const mnemonic = localStorageMock.ab_hd_private_key_mnemonic
-  expect(mnemonic).toBeDefined()
-  expect(typeof mnemonic).toBe("string")
-  expect(mnemonic).toBe(mnemonicTmp)
+test('should fail when given a invalid mnemonic', () => {
+  const fakeMnemonicPhrase = "become reason clog below only pair identify combine tortoise pizza maple invalid"
+  expect(() => {
+    new BPrivacy({mnemonic: mnemonicPhrase});
+  }).toThrow();
 })
 
-test('is able to set mnemonic phrase', () => {
-  const bp = new BPrivacy({store: localStorageMock})
-  var testMnemonic = "must flavor egg talk forward replace since ankle knife equal idea spin";
-  bp.setMnemonic(testMnemonic);
-  expect(localStorageMock.ab_hd_private_key_mnemonic).toBeDefined();
-  expect(localStorageMock.ab_hd_private_key_mnemonic).toBe(testMnemonic);
+test('should fail when not given a mnemonic', () => {
+  expect(() => {
+    new BPrivacy();
+  }).toThrow();
+})
+
+test('derives a mnemonic key when given a phrase', () => {
+  const firstMnemo = BPrivacy.generateMnemonicPhrase()
+  const bp = new BPrivacy({mnemonic: firstMnemo})
+  const secondMnemo = BPrivacy.generateMnemonicPhrase()
+  bp.deriveMnemonic(secondMnemo)
+  const derivedMnemo = bp.mnemonicKey.phrase
+  expect(derivedMnemo).toBeDefined()
+  expect(derivedMnemo.toString().split(/\s+/)).toHaveLength(12) // 12 words key/phrase
+  expect(derivedMnemo).toEqual(secondMnemo)
+  expect(derivedMnemo).not.toEqual(firstMnemo)
+})
+
+test('generates a 12 work mnemoic phrase', () => {
+  const phrase = BPrivacy.generateMnemonicPhrase()
+  expect(phrase).toBeDefined()
+  expect(phrase.split(/\s+/)).toHaveLength(12)
 });
-
-test('throws error when mnemonic phrase is invalid', () => {
-  const bp = new BPrivacy({store: localStorageMock})
-  var testInvalidMnemonic = "copper explain illfated truck neat unite branch educated tenuous hum decisive notice";
-  var threwError = false;
-  try {
-    bp.setMnemonic(testInvalidMnemonic)
-  } catch (e){
-    threwError = true;
-  }
-  expect(threwError).toBe(true);
-});
-
-test('derives a mnemonic key/phrase', () => {
-  const bp = new BPrivacy({store: localStorageMock})
-  bp.deriveMnemonic()
-  const mnemo = bp.mnemonicKey.phrase
-  expect(mnemo).toBeDefined()
-  expect(mnemo.toString().split(/\s+/)).toHaveLength(12) // 12 words key/phrase
-})
 
 test('derives the first private key, public key and address', () => {
-  const bp = new BPrivacy({store: localStorageMock})
+  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
+  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
   bp.deriveKey()
   const key = bp.pvtKey
   expect(key).toBeDefined()
@@ -62,7 +59,8 @@ test('derives the first private key, public key and address', () => {
 })
 
 test('signs a message', () => {
-  const bp = new BPrivacy({store: localStorageMock})
+  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
+  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
   bp.deriveKey()
   const signature = bp.sign("abc")
   expect(signature).toBeDefined()
@@ -75,7 +73,8 @@ test('signs a message', () => {
 })
 
 test("exposes sha3", () => {
-  const bp = new BPrivacy({store: localStorageMock})
+  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
+  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
   const hash = bp.sha3("message123")
   const expectedHash = "d860e63c5c69590c1a3184336cafdcd5ea84111b78268e71ed9a623d45be37fa"
 
@@ -84,8 +83,7 @@ test("exposes sha3", () => {
 })
 
 test('derives the correct address (at index 0)', () => {
-  const store = { ab_hd_private_key_mnemonic: examplePhrase }
-  const bp = new BPrivacy({store: store})
+  const bp = new BPrivacy({mnemonic: examplePhrase})
   bp.deriveKey()
   const address = bp.address
   expect(address).toBeDefined()
@@ -93,8 +91,7 @@ test('derives the correct address (at index 0)', () => {
 })
 
 test('signs a message via web3Sign', () => {
-  const store = { ab_hd_private_key_mnemonic: examplePhrase }
-  const bp = new BPrivacy({store: store})
+  const bp = new BPrivacy({mnemonic: examplePhrase})
   bp.deriveKey()
   const message = "a"
   const msgSignature = bp.web3Sign(message)

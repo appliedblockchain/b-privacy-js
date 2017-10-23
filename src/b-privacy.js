@@ -9,12 +9,11 @@ const util = require('ethereumjs-util')
 
 class BPrivacy {
 
-  constructor({store = localStorage, isBrowser = true}) {
+  constructor({mnemonic = null, isBrowser = true}) {
     // logging - change to `this.log = true/false` to enable/suppress logs
     this.log = false
     // defines whether we're running in the browser or on a mobile environment (React-Native)
     this.isBrowser = isBrowser
-    this.store = store
     // all instance variables/attributes (for reference)
     this.hdKey = null
     this.mnemonicKey = null
@@ -23,37 +22,20 @@ class BPrivacy {
     this.pubKey = null
     this.address = null
 
-    this.setupHDKey()
-  }
-
-
-  setupHDKey() {
-    const mnemonic = this.store.ab_hd_private_key_mnemonic
-    if (!mnemonic || mnemonic == "") {
-      this.generateMnemonic()
-      this.deriveMnemonic()
+    if (mnemonic != null) {
+      this.deriveMnemonic(mnemonic)
     } else {
-      this.deriveMnemonic()
+      throw Error("a mnemoic phrase was not provided")
     }
   }
 
-  generateMnemonic() {
-    this._p("Gen key")
-    const mnemonic = new Mnemonic()
-    this.store.ab_hd_private_key_mnemonic = mnemonic.phrase
+  static generateMnemonicPhrase() {
+    return new Mnemonic().phrase;
   }
 
-  setMnemonic(mnemonicText) {
-    if (Mnemonic.isValid(mnemonicText, Mnemonic.Words.ENGLISH)){
-      this.store.ab_hd_private_key_mnemonic = mnemonicText
-    } else{
-      throw new Error('invalid mnemonic phrase')
-    }
-  }
-
-  deriveMnemonic() {
+  deriveMnemonic(mnemonic) {
     const wordlist = Mnemonic.Words.ENGLISH
-    const mnemonicKey = new Mnemonic(this.store.ab_hd_private_key_mnemonic, wordlist)
+    const mnemonicKey = new Mnemonic(mnemonic, wordlist)
     this.mnemonicKey = mnemonicKey
     const hdKey = mnemonicKey.toHDPrivateKey()
     this.hdKey = hdKey

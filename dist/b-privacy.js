@@ -62289,14 +62289,13 @@ var EthereumBip44 = require('ethereum-bip44/es5')
 var util = require('ethereumjs-util')
 
 var BPrivacy = function BPrivacy(ref) {
-  var store = ref.store; if ( store === void 0 ) store = localStorage;
+  var mnemonic = ref.mnemonic; if ( mnemonic === void 0 ) mnemonic = null;
   var isBrowser = ref.isBrowser; if ( isBrowser === void 0 ) isBrowser = true;
 
   // logging - change to `this.log = true/false` to enable/suppress logs
   this.log = false
   // defines whether we're running in the browser or on a mobile environment (React-Native)
   this.isBrowser = isBrowser
-  this.store = store
   // all instance variables/attributes (for reference)
   this.hdKey = null
   this.mnemonicKey = null
@@ -62305,37 +62304,20 @@ var BPrivacy = function BPrivacy(ref) {
   this.pubKey = null
   this.address = null
 
-  this.setupHDKey()
-};
-
-
-BPrivacy.prototype.setupHDKey = function setupHDKey () {
-  var mnemonic = this.store.ab_hd_private_key_mnemonic
-  if (!mnemonic || mnemonic == "") {
-    this.generateMnemonic()
-    this.deriveMnemonic()
+  if (mnemonic != null) {
+    this.deriveMnemonic(mnemonic)
   } else {
-    this.deriveMnemonic()
+    throw Error("a mnemoic phrase was not provided")
   }
 };
 
-BPrivacy.prototype.generateMnemonic = function generateMnemonic () {
-  this._p("Gen key")
-  var mnemonic = new Mnemonic()
-  this.store.ab_hd_private_key_mnemonic = mnemonic.phrase
+BPrivacy.generateMnemonicPhrase = function generateMnemonicPhrase () {
+  return new Mnemonic().phrase;
 };
 
-BPrivacy.prototype.setMnemonic = function setMnemonic (mnemonicText) {
-  if (Mnemonic.isValid(mnemonicText, Mnemonic.Words.ENGLISH)){
-    this.store.ab_hd_private_key_mnemonic = mnemonicText
-  } else{
-    throw new Error('invalid mnemonic phrase')
-  }
-};
-
-BPrivacy.prototype.deriveMnemonic = function deriveMnemonic () {
+BPrivacy.prototype.deriveMnemonic = function deriveMnemonic (mnemonic) {
   var wordlist = Mnemonic.Words.ENGLISH
-  var mnemonicKey = new Mnemonic(this.store.ab_hd_private_key_mnemonic, wordlist)
+  var mnemonicKey = new Mnemonic(mnemonic, wordlist)
   this.mnemonicKey = mnemonicKey
   var hdKey = mnemonicKey.toHDPrivateKey()
   this.hdKey = hdKey

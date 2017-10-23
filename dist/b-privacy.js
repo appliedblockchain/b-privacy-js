@@ -62306,6 +62306,7 @@ var BPrivacy = function BPrivacy(ref) {
 
   if (mnemonic != null) {
     this.deriveMnemonic(mnemonic)
+    this.deriveKey();
   } else {
     throw Error("a mnemoic phrase was not provided")
   }

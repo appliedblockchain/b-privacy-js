@@ -62316,6 +62316,10 @@ BPrivacy.generateMnemonicPhrase = function generateMnemonicPhrase () {
   return new Mnemonic().phrase;
 };
 
+BPrivacy.publicKeyToAddress = function publicKeyToAddress (publicKey){
+  return util.bufferToHex(util.pubToAddress(util.addHexPrefix(publicKey), true))
+};
+
 BPrivacy.prototype.deriveMnemonic = function deriveMnemonic (mnemonic) {
   var wordlist = Mnemonic.Words.ENGLISH
   var mnemonicKey = new Mnemonic(mnemonic, wordlist)

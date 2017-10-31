@@ -34,6 +34,10 @@ class BPrivacy {
     return new Mnemonic().phrase;
   }
 
+  static publicKeyToAddress(publicKey){
+    return util.bufferToHex(util.pubToAddress(util.addHexPrefix(publicKey), true))
+  }
+
   deriveMnemonic(mnemonic) {
     const wordlist = Mnemonic.Words.ENGLISH
     const mnemonicKey = new Mnemonic(mnemonic, wordlist)

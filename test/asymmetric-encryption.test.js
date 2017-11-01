@@ -1,8 +1,6 @@
-const AsymmetricEncryption = require('../src/asymmetric-encryption.js')
-const BPrivacy = require('../src/b-privacy.js')
-
 const assert = require('assert');
-const abCrypto = require('../src');
+const { encrypt, decrypt } = require('../src/asymmetric-encryption.js')
+const BPrivacy = require('../src/b-privacy.js')
 
 function t(a, b, c) {
   assert.deepEqual(a, b, c);
@@ -10,13 +8,19 @@ function t(a, b, c) {
 
 describe('AsymmetricEncryption', function () {
 
-  it('should perform simple a->b communication', async function () {
-  	const bpA = new BPrivacy({mnemonic: BPrivacy.generateMnemonicPhrase()})
-  	const bpB = new BPrivacy({mnemonic: BPrivacy.generateMnemonicPhrase()})
-    const m1 = { foo: "bar" };
-    const a2b = await abCrypto.encrypt(m1, b.publicKey, a.privateKey);
-    const m2 = await abCrypto.decrypt(a2b, b.privateKey, a.publicKey);
-    t(m2, m1);
+  it('should perform simple a->b communication', function () {
+    const a = new BPrivacy({ mnemonic: BPrivacy.generateMnemonicPhrase() })
+    const b = new BPrivacy({ mnemonic: BPrivacy.generateMnemonicPhrase() })
+    const m = { foo: "bar" };
+    const a2b = encrypt(m, {
+      publicKey: b.publicKey,
+      privateKey: a.privateKey
+    });
+    const m2 = decrypt(a2b, {
+      privateKey: b.privateKey,
+      publicKey: a.publicKey
+    });
+    t(m2, m);
   });
 
 });

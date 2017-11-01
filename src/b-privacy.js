@@ -1,4 +1,6 @@
 const c = console
+// Hacky but fixes the Error: More than one instance of bitcore-lib found. 
+delete global._bitcore
 const bitcore = require('bitcore-lib')
 const HDPrivateKey = bitcore.HDPrivateKey
 const PrivateKey = bitcore.PrivateKey

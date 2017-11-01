@@ -109,5 +109,6 @@ class BPrivacy {
 
 module.exports = BPrivacy
 
-// export module as global when loaded in browser environment
-if (process.browser) window.BPrivacy = BPrivacy
+// Export module as global when loaded in browser environment.
+// TODO: Is this the right way to do it? [MR]
+if (process.browser) window.BPrivacy = BPrivacy // eslint-disable-line no-undef

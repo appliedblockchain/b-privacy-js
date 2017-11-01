@@ -1,5 +1,5 @@
 const c = console
-// Hacky but fixes the Error: More than one instance of bitcore-lib found. 
+// Hacky but fixes the Error: More than one instance of bitcore-lib found.
 delete global._bitcore
 const bitcore = require('bitcore-lib')
 // const bitcore = require('bitcore-lib')
@@ -10,6 +10,7 @@ const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
 const { toHex0x, toBuffer } = require('./core');
+const { encrypt, decrypt } = require('./asymmetric-encryption')
 
 class BPrivacy {
 
@@ -106,6 +107,30 @@ class BPrivacy {
 
   _p(message) {
     if (this.log) c.log(message.toString())
+  }
+
+  static encrypt(input, { privateKey, publicKey }) {
+    return encrypt(input, { privateKey, publicKey });
+  }
+
+  static decrypt(input, { privateKey }) {
+    return decrypt(input, { privateKey });
+  }
+
+  // Encrypts `input` using `BPrivacy`'s private key and provided reader's
+  // remote `publicKey`.
+  encrypt(input, publicKey) {
+    return BPrivacy.encrypt(input, {
+      privateKey: this.privateKey,
+      publicKey
+    });
+  }
+
+  // Decrypts `input` message using `BPrivacy`'s private key.
+  decrypt(input) {
+    return BPrivacy.decrypt(input, {
+      privateKey: this.privateKey
+    });
   }
 
 }

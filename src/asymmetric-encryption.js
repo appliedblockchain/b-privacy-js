@@ -16,17 +16,20 @@ function kdf(keyMaterial, keyLength) {
   return Buffer.concat(buffers).slice(0, keyLength);
 }
 
-function encrypt(input, { privateKey: maybePrivateKey, publicKey: remotePublicKey }) {
+// Encrypts `input` JSON message using `privateKey` and remote `publicKey`.
+function encrypt(input, { privateKey: inputPrivateKey, publicKey: inputPublicKey }) {
 
   const data = Buffer.from(JSON.stringify(input), 'utf8');
 
-  // TODO: We need to double check if private key satisfies elliptic curve
-  //       constraints.
-  const privateKey = maybePrivateKey ? maybePrivateKey : crypto.randomBytes(32);
+  // We'll work on buffer for private key.
+  const privateKey = toBuffer(inputPrivateKey);
+
+  // We'll work on buffer for remote public key.
+  const publicKey = toBuffer(inputPublicKey);
 
   const dh = new crypto.createECDH('secp256k1');
   dh.setPrivateKey(privateKey);
-  const secret = dh.computeSecret(toBuffer(remotePublicKey));
+  const secret = dh.computeSecret(toBuffer(publicKey));
 
   const key = kdf(secret, 32);
   const ekey = key.slice(0, 16);
@@ -43,8 +46,7 @@ function encrypt(input, { privateKey: maybePrivateKey, publicKey: remotePublicKe
     .update(ivData)
     .digest();
 
-  const publicKey = dh.getPublicKey();
-  return Buffer.concat([ publicKey, ivData, tag ]);
+  return Buffer.concat([ dh.getPublicKey(), ivData, tag ]);
 }
 
 function decrypt(data, { privateKey }) {

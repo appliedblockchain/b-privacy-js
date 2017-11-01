@@ -5,7 +5,7 @@
   "module": "dist/b-privacy.esm.js",
   "browser": "dist/b-privacy.iife.js",
   "dependencies": {
-    "bitcore-lib": "^0.14.0",
+    "bitcore-lib": "^0.15.0",
     "bitcore-mnemonic": "^1.2.5",
     "crypto": "^1.0.1",
     "ethereum-bip44": "git+https://github.com/appliedblockchain/ethereum-bip44.git#update-bitcore-lib",

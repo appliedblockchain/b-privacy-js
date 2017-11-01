@@ -1,8 +1,8 @@
 const c = console
-const bitcore = require('bitcore-lib')
-const HDPrivateKey = bitcore.HDPrivateKey
-const PrivateKey = bitcore.PrivateKey
-const Random = require('bitcore-lib/lib/crypto/random')
+// const bitcore = require('bitcore-lib')
+// const HDPrivateKey = bitcore.HDPrivateKey
+// const PrivateKey = bitcore.PrivateKey
+// const Random = require('bitcore-lib/lib/crypto/random')
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')

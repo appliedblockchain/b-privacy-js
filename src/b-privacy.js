@@ -1,20 +1,24 @@
 const c = console
+// Hacky but fixes the Error: More than one instance of bitcore-lib found.
+delete global._bitcore
 const bitcore = require('bitcore-lib')
-const HDPrivateKey = bitcore.HDPrivateKey
-const PrivateKey = bitcore.PrivateKey
-const Random = require('bitcore-lib/lib/crypto/random')
+// const bitcore = require('bitcore-lib')
+// const HDPrivateKey = bitcore.HDPrivateKey
+// const PrivateKey = bitcore.PrivateKey
+// const Random = require('bitcore-lib/lib/crypto/random')
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
+const { toHex0x, toBuffer } = require('./core');
+const { encrypt, decrypt } = require('./asymmetric-encryption')
 
 class BPrivacy {
 
-  constructor({store = localStorage, isBrowser = true}) {
+  constructor({mnemonic = null, isBrowser = true}) {
     // logging - change to `this.log = true/false` to enable/suppress logs
     this.log = false
     // defines whether we're running in the browser or on a mobile environment (React-Native)
     this.isBrowser = isBrowser
-    this.store = store
     // all instance variables/attributes (for reference)
     this.hdKey = null
     this.mnemonicKey = null
@@ -23,37 +27,35 @@ class BPrivacy {
     this.pubKey = null
     this.address = null
 
-    this.setupHDKey()
-  }
-
-
-  setupHDKey() {
-    const mnemonic = this.store.ab_hd_private_key_mnemonic
-    if (!mnemonic || mnemonic == "") {
-      this.generateMnemonic()
-      this.deriveMnemonic()
+    if (mnemonic != null) {
+      this.deriveMnemonic(mnemonic)
+      this.deriveKey();
     } else {
-      this.deriveMnemonic()
+      throw Error("a mnemoic phrase was not provided")
     }
   }
 
-  generateMnemonic() {
-    this._p("Gen key")
-    const mnemonic = new Mnemonic()
-    this.store.ab_hd_private_key_mnemonic = mnemonic.phrase
+  // Returns public key as `Buffer`.
+  get publicKey() {
+    return toBuffer(this.pubKey.toString());
   }
 
-  setMnemonic(mnemonicText) {
-    if (Mnemonic.isValid(mnemonicText, Mnemonic.Words.ENGLISH)){
-      this.store.ab_hd_private_key_mnemonic = mnemonicText
-    } else{
-      throw new Error('invalid mnemonic phrase')
-    }
+  // Returns private key as `Buffer`.
+  get privateKey() {
+    return toBuffer(this.pvtKey.toString());
   }
 
-  deriveMnemonic() {
+  static generateMnemonicPhrase() {
+    return new Mnemonic().phrase;
+  }
+
+  static publicKeyToAddress(publicKey) {
+    return toHex0x(util.pubToAddress(toHex0x(publicKey), true));
+  }
+
+  deriveMnemonic(mnemonic) {
     const wordlist = Mnemonic.Words.ENGLISH
-    const mnemonicKey = new Mnemonic(this.store.ab_hd_private_key_mnemonic, wordlist)
+    const mnemonicKey = new Mnemonic(mnemonic, wordlist)
     this.mnemonicKey = mnemonicKey
     const hdKey = mnemonicKey.toHDPrivateKey()
     this.hdKey = hdKey
@@ -107,9 +109,34 @@ class BPrivacy {
     if (this.log) c.log(message.toString())
   }
 
+  static encrypt(input, { privateKey, publicKey }) {
+    return encrypt(input, { privateKey, publicKey });
+  }
+
+  static decrypt(input, { privateKey }) {
+    return decrypt(input, { privateKey });
+  }
+
+  // Encrypts `input` using `BPrivacy`'s private key and provided reader's
+  // remote `publicKey`.
+  encrypt(input, publicKey) {
+    return BPrivacy.encrypt(input, {
+      privateKey: this.privateKey,
+      publicKey
+    });
+  }
+
+  // Decrypts `input` message using `BPrivacy`'s private key.
+  decrypt(input) {
+    return BPrivacy.decrypt(input, {
+      privateKey: this.privateKey
+    });
+  }
+
 }
 
 module.exports = BPrivacy
 
-// export module as global when loaded in browser environment
-if (process.browser) window.BPrivacy = BPrivacy
+// Export module as global when loaded in browser environment.
+// TODO: Is this the right way to do it? [MR]
+if (process.browser) window.BPrivacy = BPrivacy // eslint-disable-line no-undef

@@ -2,12 +2,14 @@ const c = console
 // Hacky but fixes the Error: More than one instance of bitcore-lib found. 
 delete global._bitcore
 const bitcore = require('bitcore-lib')
-const HDPrivateKey = bitcore.HDPrivateKey
-const PrivateKey = bitcore.PrivateKey
-const Random = require('bitcore-lib/lib/crypto/random')
+// const bitcore = require('bitcore-lib')
+// const HDPrivateKey = bitcore.HDPrivateKey
+// const PrivateKey = bitcore.PrivateKey
+// const Random = require('bitcore-lib/lib/crypto/random')
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
+const { toHex0x, toBuffer } = require('./core');
 
 class BPrivacy {
 
@@ -32,12 +34,22 @@ class BPrivacy {
     }
   }
 
+  // Returns public key as `Buffer`.
+  get publicKey() {
+    return toBuffer(this.pubKey.toString());
+  }
+
+  // Returns private key as `Buffer`.
+  get privateKey() {
+    return toBuffer(this.pvtKey.toString());
+  }
+
   static generateMnemonicPhrase() {
     return new Mnemonic().phrase;
   }
 
-  static publicKeyToAddress(publicKey){
-    return util.bufferToHex(util.pubToAddress(util.addHexPrefix(publicKey), true))
+  static publicKeyToAddress(publicKey) {
+    return toHex0x(util.pubToAddress(toHex0x(publicKey), true));
   }
 
   deriveMnemonic(mnemonic) {
@@ -100,5 +112,6 @@ class BPrivacy {
 
 module.exports = BPrivacy
 
-// export module as global when loaded in browser environment
-if (process.browser) window.BPrivacy = BPrivacy
+// Export module as global when loaded in browser environment.
+// TODO: Is this the right way to do it? [MR]
+if (process.browser) window.BPrivacy = BPrivacy // eslint-disable-line no-undef

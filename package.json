@@ -2,8 +2,6 @@
   "name": "b-privacy",
   "version": "0.2.0",
   "main": "src/b-privacy.js",
-  "module": "dist/b-privacy.esm.js",
-  "browser": "dist/b-privacy.iife.js",
   "dependencies": {
     "bitcore-lib": "^0.15.0",
     "bitcore-mnemonic": "^1.2.5",
@@ -13,6 +11,7 @@
   },
   "devDependencies": {
     "bubleify": "^0.7.0",
+    "eslint": "^4.10.0",
     "jest": "^20.0.4",
     "watchify": "^3.9.0"
   },
@@ -20,7 +19,9 @@
     "build": "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
     "dev": "watchify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
     "test": "jest",
-    "pretest": "npm run build"
+    "pretest": "npm run build",
+    "browserify": "browserify",
+    "bubleify": "bubleify"
   },
   "files": [
     "dist",

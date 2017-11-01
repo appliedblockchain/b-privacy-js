@@ -1,0 +1,62 @@
+class AsymmetricEncryption {
+  async encrypt(input, remotePublicKey, maybePrivateKey = null) {
+
+    const data = Buffer.from(JSON.stringify(input), 'utf8');
+
+    // TODO: We need to double check if private key satisfies elliptic curve
+    //       constraints.
+    const privateKey = maybePrivateKey ? maybePrivateKey : crypto.randomBytes(32);
+
+    const dh = new crypto.createECDH('secp256k1');
+    dh.setPrivateKey(privateKey);
+    const secret = dh.computeSecret(remotePublicKey);
+
+    const key = kdf(secret, 32);
+    const ekey = key.slice(0, 16);
+    const mkey = crypto.createHash('sha256')
+      .update(key.slice(16, 32))
+      .digest();
+
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-128-ctr', ekey, iv);
+    const encryptedData = cipher.update(data);
+    const ivData = Buffer.concat([ iv, encryptedData ]);
+
+    const tag = crypto.createHmac('sha256', mkey)
+      .update(ivData)
+      .digest();
+
+    const publicKey = dh.getPublicKey();
+    return Buffer.concat([ publicKey, ivData, tag ]);
+  }
+
+  async decrypt(data, privateKey, maybePublicKey) {
+    const publicKey = data.slice(0, 65);
+
+    assert(
+      maybePublicKey == null || Buffer.from(maybePublicKey).equals(publicKey),
+      'Public key mismatch.'
+    );
+
+    const ivData = data.slice(65, -32);
+    const tag = data.slice(-32);
+
+    // derive keys
+    const dh = new crypto.createECDH('secp256k1');
+    dh.setPrivateKey(privateKey);
+    const x = dh.computeSecret(publicKey);
+
+    const key = kdf(x, 32);
+    const ekey = key.slice(0, 16);
+    const mkey = crypto.createHash('sha256').update(key.slice(16, 32)).digest();
+
+    const tag2 = crypto.createHmac('sha256', mkey).update(ivData).digest();
+    assert(tag2.equals(tag), 'Tag mismatch.');
+
+    const iv = ivData.slice(0, 16);
+    const encryptedData = ivData.slice(16);
+    const decipher = crypto.createDecipheriv('aes-128-ctr', ekey, iv);
+    const decrypted = decipher.update(encryptedData);
+    return JSON.parse(decrypted.toString('utf8'));
+  }
+}

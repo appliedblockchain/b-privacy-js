@@ -1,7 +1,7 @@
 {
   "name": "b-privacy",
   "version": "0.2.0",
-  "main": "dist/b-privacy.cjs.js",
+  "main": "src/b-privacy.js",
   "module": "dist/b-privacy.esm.js",
   "browser": "dist/b-privacy.iife.js",
   "dependencies": {

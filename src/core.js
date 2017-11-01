@@ -2,7 +2,7 @@
 // Returns string describing kind of type of `value`, ie. `null` or `promise`.
 function kindOf(value) {
   if (typeof value !== 'object') {
-    return `${typeof value} ${value}`;
+    return typeof value;
   }
   if (value === null) {
     return 'null';
@@ -16,7 +16,13 @@ function kindOf(value) {
   if (isBuffer(value)) {
     return 'buffer';
   }
-  return `[other] ${JSON.stringify(value)}`;
+  return `[other]`;
+}
+
+// Unsafe version of `kindOf`. For testing only. Should not be used in the code
+// as it can leak sensitive information into thrown errors.
+function unsafeKindOf(value) {
+  return `${kindOf(value)} ${JSON.stringify(value)}`;
 }
 
 // Check if `value` is a string, returns `true` or `false`.
@@ -101,5 +107,7 @@ module.exports = {
   toBuffer,
   // toHex,
   toHex0x,
-  areBuffersEqual
+  areBuffersEqual,
+  kindOf,
+  unsafeKindOf
 };

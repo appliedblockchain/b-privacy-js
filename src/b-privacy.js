@@ -6,6 +6,7 @@ const c = console
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
+const { toHex0x, toBuffer } = require('./core');
 
 class BPrivacy {
 
@@ -30,12 +31,22 @@ class BPrivacy {
     }
   }
 
+  // Returns public key as `Buffer`.
+  get publicKey() {
+    return toBuffer(this.pubKey.toString());
+  }
+
+  // Returns private key as `Buffer`.
+  get privateKey() {
+    return toBuffer(this.pvtKey.toString());
+  }
+
   static generateMnemonicPhrase() {
     return new Mnemonic().phrase;
   }
 
-  static publicKeyToAddress(publicKey){
-    return util.bufferToHex(util.pubToAddress(util.addHexPrefix(publicKey), true))
+  static publicKeyToAddress(publicKey) {
+    return toHex0x(util.pubToAddress(toHex0x(publicKey), true));
   }
 
   deriveMnemonic(mnemonic) {

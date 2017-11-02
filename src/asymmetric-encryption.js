@@ -1,7 +1,10 @@
 
 const assert = require('assert');
+const elliptic = require('elliptic');
 const crypto = require('crypto');
 const { toBuffer } = require('./core');
+
+const ec = elliptic.ec('secp256k1');
 
 // TODO: Remove, use `crypto.pbkdf2` or something else.
 function kdf(keyMaterial, keyLength) {
@@ -16,20 +19,21 @@ function kdf(keyMaterial, keyLength) {
   return Buffer.concat(buffers).slice(0, keyLength);
 }
 
-// Encrypts `input` JSON message using `privateKey` and remote `publicKey`.
-function encrypt(input, { privateKey: inputPrivateKey, publicKey: inputPublicKey }) {
+// Encrypts `input` JSON message using `privateKey` and `remoteKey` public key.
+function encrypt(input, _privateKey, _remoteKey) {
 
   const data = Buffer.from(JSON.stringify(input), 'utf8');
 
   // We'll work on buffer for private key.
-  const privateKey = toBuffer(inputPrivateKey);
+  const privateKey = toBuffer(_privateKey);
 
   // We'll work on buffer for remote public key.
-  const publicKey = toBuffer(inputPublicKey);
+  const remoteKey = toBuffer(_remoteKey);
 
-  const dh = new crypto.createECDH('secp256k1');
-  dh.setPrivateKey(privateKey);
-  const secret = dh.computeSecret(toBuffer(publicKey));
+  // Derive secret.
+  const secret = ec.keyFromPrivate(privateKey)
+    .derive(ec.keyFromPublic(remoteKey).getPublic())
+    .toArrayLike(Buffer);
 
   const key = kdf(secret, 32);
   const ekey = key.slice(0, 16);
@@ -46,21 +50,25 @@ function encrypt(input, { privateKey: inputPrivateKey, publicKey: inputPublicKey
     .update(ivData)
     .digest();
 
-  return Buffer.concat([ dh.getPublicKey(), ivData, tag ]);
+  return Buffer.concat([
+    Buffer.from(ec.keyFromPrivate(privateKey).getPublic('hex'), 'hex'),
+    ivData,
+    tag
+  ]);
 }
 
-function decrypt(data, { privateKey }) {
+function decrypt(data, privateKey) {
   const publicKey = data.slice(0, 65);
 
   const ivData = data.slice(65, -32);
   const tag = data.slice(-32);
 
-  // derive keys
-  const dh = new crypto.createECDH('secp256k1');
-  dh.setPrivateKey(privateKey);
-  const x = dh.computeSecret(publicKey);
+  // Derive secret.
+  const secret = ec.keyFromPrivate(privateKey)
+    .derive(ec.keyFromPublic(publicKey).getPublic())
+    .toArrayLike(Buffer);
 
-  const key = kdf(x, 32);
+  const key = kdf(secret, 32);
   const ekey = key.slice(0, 16);
   const mkey = crypto.createHash('sha256').update(key.slice(16, 32)).digest();
 

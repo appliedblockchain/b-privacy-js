@@ -1,7 +1,7 @@
 const c = console
 // Hacky but fixes the Error: More than one instance of bitcore-lib found.
 delete global._bitcore
-const bitcore = require('bitcore-lib')
+// const bitcore = require('bitcore-lib')
 // const bitcore = require('bitcore-lib')
 // const HDPrivateKey = bitcore.HDPrivateKey
 // const PrivateKey = bitcore.PrivateKey
@@ -109,28 +109,23 @@ class BPrivacy {
     if (this.log) c.log(message.toString())
   }
 
-  static encrypt(input, { privateKey, publicKey }) {
-    return encrypt(input, { privateKey, publicKey });
+  static encrypt(input, privateKey, remoteKey) {
+    return encrypt(input, privateKey, remoteKey);
   }
 
-  static decrypt(input, { privateKey }) {
-    return decrypt(input, { privateKey });
+  static decrypt(input, privateKey) {
+    return decrypt(input, privateKey);
   }
 
   // Encrypts `input` using `BPrivacy`'s private key and provided reader's
   // remote `publicKey`.
-  encrypt(input, publicKey) {
-    return BPrivacy.encrypt(input, {
-      privateKey: this.privateKey,
-      publicKey
-    });
+  encrypt(input, remoteKey) {
+    return BPrivacy.encrypt(input, this.privateKey, remoteKey);
   }
 
   // Decrypts `input` message using `BPrivacy`'s private key.
   decrypt(input) {
-    return BPrivacy.decrypt(input, {
-      privateKey: this.privateKey
-    });
+    return BPrivacy.decrypt(input, this.privateKey);
   }
 
 }

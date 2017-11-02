@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "b-privacy",
   "version": "0.2.0",
   "main": "src/b-privacy.js",

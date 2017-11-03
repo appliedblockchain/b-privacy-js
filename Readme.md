@@ -1,6 +1,44 @@
-# B Privacy (JS)
+## Summary
 
-(Name subject to change)
+B Privacy js library, supported runtimes: nodejs, react-native and browser.
+
+Supports:
+* generating new accounts `new B({ mnemonic: B.generateMnemonicPhrase() })`
+* restoring accounts from mnemonic `new B({ mnemonic })`
+* access to mnemonic, private key, public key and ethereum address `[a.mnemonic, a.privateKey, a.publicKey, a.address]`
+* asymmetric encryption `a.encrypt(msg, b.publicKey)`
+* asymmetric decryption `b.decrypt(msg, a.publicKey)`
+* signing `s = a.sign(msg)` (alternatively `s = a.web3Sign(msg)` to get 0x-prefixed, single blob instead of `{ r, s, v }` object in case of `sign`)
+* --verifying signature `b.verify(s, a.publicKey)`--
+* deriving address from public key `B.publicKeyToAddress(publicKey)`
+
+## Installation
+
+    npm i -D git+ssh://git@github.com:appliedblockchain/b-privacy-js.git#v0.2.1
+
+## Usage
+
+    const assert = require('assert');
+    const B = require('b-privacy');
+
+    // Create accounts.
+    const alice = new B({ mnemonic: B.generateMnemonicPhrase() });
+    const bob = new B({ mnemonic: B.generateMnemonicPhrase() });
+
+    // Alice encrypts a message for Bob.
+    const encrypted = alice.encrypt({ foo: "bar" }, bob.publicKey);
+
+    // Bob decrypts message from Alice.
+    assert.deepEqual(
+      bob.decrypt(encrypted, alice.publicKey),
+      { foo: "bar" }
+    );
+
+For more usage examples please refer to tests in `test` directory.
+
+---
+
+_We'll need to clean-up below docs_
 
 Blockchain Privacy JS library
 
@@ -16,9 +54,9 @@ Package the library for release (browser/node)
 
     npm run build
 
-### Test
+## Testing
 
-    npm run test
+    npm test
 
 or:
 
@@ -42,7 +80,7 @@ To make the example work you need to build bitcore-lib for the browser, run:
 
 
 ### Usage
-Storage of the key should be handled 
+Storage of the key should be handled
 
 ```
 var phrase = BPrivacy.generateMnemonicPhrase(); // "monkey flip moral arrow cannon icon embody muffin ski train cool spray"

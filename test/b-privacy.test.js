@@ -2,6 +2,7 @@ const c = console
 const BPrivacy = require('../src/b-privacy.js')
 const localStorageMock = {}
 let mnemonicTmp
+const { toHex0x, toBuffer } = require('../src/core');
 
 const examplePhrase = "aspect else project orient seed doll admit remind library turkey dutch inhale"
 
@@ -46,13 +47,13 @@ test('generates a 12 work mnemoic phrase', () => {
 test('derives the first private key, public key and address', () => {
   const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
   const bp = new BPrivacy({mnemonic: mnemonicPhrase})
-  bp.deriveKey()
   const key = bp.pvtKey
   expect(key).toBeDefined()
-  expect(key.toString()).toHaveLength(64)
+  // We use to 0x prefix for all
+  expect(toHex0x(key)).toHaveLength(66)
   const pubKey = bp.pubKey
   expect(pubKey).toBeDefined()
-  expect(pubKey.toString()).toHaveLength(66)
+  expect(toHex0x(pubKey)).toHaveLength(130)
   const address = bp.address
   expect(address).toBeDefined()
   expect(address.toString()).toHaveLength(42)

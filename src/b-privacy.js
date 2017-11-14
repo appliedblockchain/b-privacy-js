@@ -63,10 +63,9 @@ class BPrivacy {
     const pvtKey = derivedChild.privateKey
     this.pvtKeyBtc = pvtKey;
     this.pvtKey = toBuffer(pvtKey.toString());
-    this.pubKey = toBuffer(pvtKey.publicKey.toString());
+    this.pubKey = this.deriveEthereumPublicKey();
     this.keyIdx = index
-    this.deriveEthereumAddress()
-    return pvtKey
+    this.address = this.deriveEthereumAddress()
   }
 
   deriveEthereumPublicKey() {
@@ -76,15 +75,14 @@ class BPrivacy {
   deriveEthereumAddress() {
     const eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
     const address = eBip44.getAddress(this.keyIdx)
-    this.address = address
-    return
+    return address;
   }
 
   // returns a promise with one parameter, the message signature
   sign(message) {
     const msgHash = util.sha3(message)
 
-    const signature = util.ecsign(msgHash, new Buffer(this.pvtKey.toString(), 'hex'))
+    const signature = util.ecsign(msgHash, this.pvtKey)
     return signature
   }
 

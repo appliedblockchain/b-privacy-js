@@ -35,16 +35,6 @@ class BPrivacy {
     }
   }
 
-  // Returns public key as `Buffer`.
-  get publicKey() {
-    return toBuffer(this.pubKey.toString());
-  }
-
-  // Returns private key as `Buffer`.
-  get privateKey() {
-    return toBuffer(this.pvtKey.toString());
-  }
-
   static generateMnemonicPhrase() {
     return new Mnemonic().phrase;
   }
@@ -71,11 +61,16 @@ class BPrivacy {
     const pathLevel = `44'/${coinType}'/${account}'/${change}` // *note2
     const derivedChild = this.hdKey.derive(`m/${pathLevel}/${index}`)
     const pvtKey = derivedChild.privateKey
-    this.pvtKey = pvtKey
-    this.pubKey = pvtKey.publicKey
+    this.pvtKeyBtc = pvtKey;
+    this.pvtKey = toBuffer(pvtKey.toString());
+    this.pubKey = toBuffer(pvtKey.publicKey.toString());
     this.keyIdx = index
     this.deriveEthereumAddress()
     return pvtKey
+  }
+
+  deriveEthereumPublicKey() {
+    return util.privateToPublic(this.pvtKey);
   }
 
   deriveEthereumAddress() {

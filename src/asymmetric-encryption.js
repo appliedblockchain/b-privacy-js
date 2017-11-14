@@ -21,7 +21,6 @@ function kdf(keyMaterial, keyLength) {
 
 // Encrypts `input` JSON message using `privateKey` and `remoteKey` public key.
 function encrypt(input, _privateKey, _remoteKey) {
-
   const data = Buffer.from(JSON.stringify(input), 'utf8');
 
   // We'll work on buffer for private key.

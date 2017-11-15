@@ -11,7 +11,7 @@ describe('AsymmetricEncryption', function () {
     const a = new B({ mnemonic: B.generateMnemonicPhrase() })
     const b = new B({ mnemonic: B.generateMnemonicPhrase() })
     const m = { foo: "bar" };
-    const a2b = a.encrypt(m, b.publicKey);
+    const a2b = a.encrypt(m, b.pubKey);
     const m2 = b.decrypt(a2b);
     t(m2, m);
   });

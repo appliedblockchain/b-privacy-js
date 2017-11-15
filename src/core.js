@@ -105,7 +105,7 @@ module.exports = {
   isHex,
   isHex0x,
   toBuffer,
-  // toHex,
+  //toHex,
   toHex0x,
   areBuffersEqual,
   kindOf,

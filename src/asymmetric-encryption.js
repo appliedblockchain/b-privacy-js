@@ -31,7 +31,7 @@ function encrypt(input, _privateKey, _remoteKey) {
 
   // Derive secret.
   const secret = ec.keyFromPrivate(privateKey)
-    .derive(ec.keyFromPublic(remoteKey).getPublic())
+    .derive(ec.keyFromPublic({x: remoteKey.slice(0,32), y: remoteKey.slice(32,remoteKey.length)}).getPublic())
     .toArrayLike(Buffer);
 
   const key = kdf(secret, 32);

@@ -113,12 +113,12 @@ class BPrivacy {
   // Encrypts `input` using `BPrivacy`'s private key and provided reader's
   // remote `publicKey`.
   encrypt(input, remoteKey) {
-    return BPrivacy.encrypt(input, this.privateKey, remoteKey);
+    return BPrivacy.encrypt(input, this.pvtKey, remoteKey);
   }
 
   // Decrypts `input` message using `BPrivacy`'s private key.
   decrypt(input) {
-    return BPrivacy.decrypt(input, this.privateKey);
+    return BPrivacy.decrypt(input, this.pvtKey);
   }
 
 }

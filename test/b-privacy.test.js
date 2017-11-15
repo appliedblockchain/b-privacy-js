@@ -2,6 +2,7 @@ const c = console
 const BPrivacy = require('../src/b-privacy.js')
 const localStorageMock = {}
 let mnemonicTmp
+const { toHex0x, toBuffer } = require('../src/core');
 
 const examplePhrase = "aspect else project orient seed doll admit remind library turkey dutch inhale"
 
@@ -46,13 +47,13 @@ test('generates a 12 work mnemoic phrase', () => {
 test('derives the first private key, public key and address', () => {
   const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
   const bp = new BPrivacy({mnemonic: mnemonicPhrase})
-  bp.deriveKey()
   const key = bp.pvtKey
   expect(key).toBeDefined()
-  expect(key.toString()).toHaveLength(64)
+  // We use to 0x prefix for all
+  expect(toHex0x(key)).toHaveLength(66)
   const pubKey = bp.pubKey
   expect(pubKey).toBeDefined()
-  expect(pubKey.toString()).toHaveLength(66)
+  expect(toHex0x(pubKey)).toHaveLength(130)
   const address = bp.address
   expect(address).toBeDefined()
   expect(address.toString()).toHaveLength(42)
@@ -104,14 +105,8 @@ test('signs a message via web3Sign', () => {
   // optput: 0x3ac225168df54212a25c1c01fd35bebfea408fdac2e31ddd6f80a4bbf9a5f1cb 0x1c1931b8a3c91af0afae485d8ce5b597c5f2424f2bb3055b56e0204790047dd85379bce18b7279a04a1674d4bbfc302a5a68fb497da4a90bd924991bbeb7db1b1b 0xfc86f571353e44568aa9103db4edd7f53a410c73
 })
 
-test('converts a stringified public_key (without 0x prefix) to an address', () => {
+test('converts a public_key to an address', () => {
   const bp = new BPrivacy({mnemonic: examplePhrase})
-  let staticAddress = BPrivacy.publicKeyToAddress(bp.pubKey.toString());
-  expect(staticAddress).toEqual(bp.address);
-});
-
-test('converts a stringified public_key (with 0x prefix) to an address', () => {
-  const bp = new BPrivacy({mnemonic: examplePhrase})
-  let staticAddress = BPrivacy.publicKeyToAddress(`0x${bp.pubKey.toString()}`);
+  let staticAddress = BPrivacy.publicKeyToAddress(bp.pubKey);
   expect(staticAddress).toEqual(bp.address);
 });

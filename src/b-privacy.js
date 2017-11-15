@@ -35,16 +35,6 @@ class BPrivacy {
     }
   }
 
-  // Returns public key as `Buffer`.
-  get publicKey() {
-    return toBuffer(this.pubKey.toString());
-  }
-
-  // Returns private key as `Buffer`.
-  get privateKey() {
-    return toBuffer(this.pvtKey.toString());
-  }
-
   static generateMnemonicPhrase() {
     return new Mnemonic().phrase;
   }
@@ -71,25 +61,28 @@ class BPrivacy {
     const pathLevel = `44'/${coinType}'/${account}'/${change}` // *note2
     const derivedChild = this.hdKey.derive(`m/${pathLevel}/${index}`)
     const pvtKey = derivedChild.privateKey
-    this.pvtKey = pvtKey
-    this.pubKey = pvtKey.publicKey
+    this.pvtKeyBtc = pvtKey;
+    this.pvtKey = toBuffer(pvtKey.toString());
+    this.pubKey = this.deriveEthereumPublicKey();
     this.keyIdx = index
-    this.deriveEthereumAddress()
-    return pvtKey
+    this.address = this.deriveEthereumAddress()
+  }
+
+  deriveEthereumPublicKey() {
+    return util.privateToPublic(this.pvtKey);
   }
 
   deriveEthereumAddress() {
     const eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
     const address = eBip44.getAddress(this.keyIdx)
-    this.address = address
-    return
+    return address;
   }
 
   // returns a promise with one parameter, the message signature
   sign(message) {
     const msgHash = util.sha3(message)
 
-    const signature = util.ecsign(msgHash, new Buffer(this.pvtKey.toString(), 'hex'))
+    const signature = util.ecsign(msgHash, this.pvtKey)
     return signature
   }
 
@@ -120,12 +113,12 @@ class BPrivacy {
   // Encrypts `input` using `BPrivacy`'s private key and provided reader's
   // remote `publicKey`.
   encrypt(input, remoteKey) {
-    return BPrivacy.encrypt(input, this.privateKey, remoteKey);
+    return BPrivacy.encrypt(input, this.pvtKey, remoteKey);
   }
 
   // Decrypts `input` message using `BPrivacy`'s private key.
   decrypt(input) {
-    return BPrivacy.decrypt(input, this.privateKey);
+    return BPrivacy.decrypt(input, this.pvtKey);
   }
 
 }

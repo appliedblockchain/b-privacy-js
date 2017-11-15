@@ -21,18 +21,17 @@ function kdf(keyMaterial, keyLength) {
 
 // Encrypts `input` JSON message using `privateKey` and `remoteKey` public key.
 function encrypt(input, _privateKey, _remoteKey) {
-
   const data = Buffer.from(JSON.stringify(input), 'utf8');
 
   // We'll work on buffer for private key.
-  const privateKey = toBuffer(_privateKey);
+  const privateKey = _privateKey;
 
   // We'll work on buffer for remote public key.
-  const remoteKey = toBuffer(_remoteKey);
+  const remoteKey = _remoteKey;
 
   // Derive secret.
   const secret = ec.keyFromPrivate(privateKey)
-    .derive(ec.keyFromPublic(remoteKey).getPublic())
+    .derive(ec.keyFromPublic({x: remoteKey.slice(0,32), y: remoteKey.slice(32,remoteKey.length)}).getPublic())
     .toArrayLike(Buffer);
 
   const key = kdf(secret, 32);

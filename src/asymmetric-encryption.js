@@ -24,10 +24,10 @@ function encrypt(input, _privateKey, _remoteKey) {
   const data = Buffer.from(JSON.stringify(input), 'utf8');
 
   // We'll work on buffer for private key.
-  const privateKey = toBuffer(_privateKey);
+  const privateKey = _privateKey;
 
   // We'll work on buffer for remote public key.
-  const remoteKey = toBuffer(_remoteKey);
+  const remoteKey = _remoteKey;
 
   // Derive secret.
   const secret = ec.keyFromPrivate(privateKey)

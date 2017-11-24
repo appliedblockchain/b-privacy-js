@@ -12,16 +12,16 @@ describe('B', function () {
     const b = new B({ mnemonic });
     t(b.isBrowser, true);
     t(b.mnemonicKey.phrase, mnemonic);
-  })
+  });
 
   it('should fail when given a invalid mnemonic', () => {
     const mnemonic = 'become reason clog below only pair identify combine tortoise pizza maple invalid'
     t(() => new B({ mnemonic }), Error, 'Should throw for fake mnemonic.');
-  })
+  });
 
   it('should fail when not given a mnemonic', () => {
     t(() => new B(), Error, 'Expected throw when no mnemonic provided.');
-  })
+  });
 
   it('derives a mnemonic key when given a phrase', () => {
     const firstMnemo = B.generateMnemonicPhrase()
@@ -33,7 +33,7 @@ describe('B', function () {
     t(derivedMnemo.split(/\s+/).length, 12, '12 words phrase.');
     t(derivedMnemo, secondMnemo);
     f(derivedMnemo, firstMnemo);
-  })
+  });
 
   it('generates a 12 work mnemoic phrase', () => {
     const phrase = B.generateMnemonicPhrase()
@@ -54,7 +54,7 @@ describe('B', function () {
     t(address != null);
     t(typeof address, 'string');
     t(address.length, 2 + 2 * 20);
-  })
+  });
 
   it('signs a message', () => {
     const mnemonic = B.generateMnemonicPhrase();
@@ -67,7 +67,7 @@ describe('B', function () {
     t(s.s.length, 32);
     t(s.r.length, 32);
     t(s.v != null);
-  })
+  });
 
   it('exposes sha3', () => {
     const mnemonic = B.generateMnemonicPhrase();
@@ -75,13 +75,13 @@ describe('B', function () {
     const hash = bp.sha3('message123');
     const expectedHash = 'd860e63c5c69590c1a3184336cafdcd5ea84111b78268e71ed9a623d45be37fa';
     t(hash, expectedHash);
-  })
+  });
 
   it('derives the correct address (at index 0)', () => {
     const b = new B({ mnemonic: examplePhrase });
     b.deriveKey();
-    t(b.address, '0xfdc7867dac261b3ee47fcd00b4f94a525ff5db1c');
-  })
+    t(b.address, '0xfdc7867DAc261b3EE47FCd00b4F94a525FF5DB1c');
+  });
 
   it('signs a message via web3Sign', () => {
     const bp = new B({ mnemonic: examplePhrase });
@@ -95,7 +95,7 @@ describe('B', function () {
     // example signed message parts - messageHash, msgSignature, signerAddress:
     // c.log(`0x${bp.sha3(message)}`, messageSigned, bp.address)
     // optput: 0x3ac225168df54212a25c1c01fd35bebfea408fdac2e31ddd6f80a4bbf9a5f1cb 0x1c1931b8a3c91af0afae485d8ce5b597c5f2424f2bb3055b56e0204790047dd85379bce18b7279a04a1674d4bbfc302a5a68fb497da4a90bd924991bbeb7db1b1b 0xfc86f571353e44568aa9103db4edd7f53a410c73
-  })
+  });
 
   it('converts a public_key to an address', () => {
     const bp = new B({ mnemonic: examplePhrase });
@@ -106,6 +106,11 @@ describe('B', function () {
   it('should handle zero-padded private keys', () => {
     const b = new B({ mnemonic: 'letter giraffe harvest lift test giraffe quit fiscal carpet armed script milk' });
     t(b.pvtKey.toString('hex'), '00c22bc1b06fea6e01d24e5b3fce1f3bc07b180bc3f73d513330acc812142e90');
+  });
+
+  it('should generate checksummed address', () => {
+    const b = new B({ mnemonic: examplePhrase });
+    t(b.address, '0xfdc7867DAc261b3EE47FCd00b4F94a525FF5DB1c');
   });
 
 });

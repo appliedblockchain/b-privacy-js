@@ -12,6 +12,7 @@ const util = require('ethereumjs-util')
 const { toHex0x } = require('./core');
 const { encrypt, decrypt } = require('./asymmetric-encryption');
 const symmetric = require('./symmetric-encryption');
+const toChecksumAddress = require('./to-checksum-address');
 // const debug = require('debug')('b-privacy');
 
 class BPrivacy {
@@ -42,7 +43,7 @@ class BPrivacy {
   }
 
   static publicKeyToAddress(publicKey) {
-    return toHex0x(util.pubToAddress(toHex0x(publicKey), true));
+    return toChecksumAddress(toHex0x(util.pubToAddress(toHex0x(publicKey), true)));
   }
 
   deriveMnemonic(mnemonic) {
@@ -77,7 +78,7 @@ class BPrivacy {
   deriveEthereumAddress() {
     const eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
     const address = eBip44.getAddress(this.keyIdx)
-    return address;
+    return toChecksumAddress(address);
   }
 
   // returns a promise with one parameter, the message signature

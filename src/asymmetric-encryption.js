@@ -62,10 +62,10 @@ function decrypt(data, privateKey, remotePublicKey) {
   const publicKey = data.slice(0, 65);
 
   if (remotePublicKey) {
-    let compareKey = publicKey
+    let compareKey = publicKey;
     // Remove \x04 prefix from publicKey if remotePublicKey does not have it
     if (remotePublicKey.slice(0,1) !== '04') {
-      compareKey = compareKey.slice(1)
+      compareKey = compareKey.slice(1);
     }
     assert(remotePublicKey.equals(compareKey), 'Remote publicKey mismatch.');
   }

@@ -1,9 +1,5 @@
-const assert = require('assert');
 const B = require('../src/b-privacy.js')
-
-function t(a, b, c) {
-  assert.deepEqual(a, b, c);
-}
+const { t } = require('./helpers');
 
 describe('AsymmetricEncryption', function () {
 

@@ -2,7 +2,6 @@
 const assert = require('assert');
 const elliptic = require('elliptic');
 const crypto = require('crypto');
-const { toBuffer } = require('./core');
 
 const ec = elliptic.ec('secp256k1');
 

@@ -10,7 +10,8 @@ const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
 const { toHex0x, toBuffer } = require('./core');
-const { encrypt, decrypt } = require('./asymmetric-encryption')
+const { encrypt, decrypt } = require('./asymmetric-encryption');
+const symmetric = require('./symmetric-encryption');
 
 class BPrivacy {
 
@@ -119,6 +120,24 @@ class BPrivacy {
   // Decrypts `input` message using `BPrivacy`'s private key.
   decrypt(input) {
     return BPrivacy.decrypt(input, this.pvtKey);
+  }
+
+  // Symmetric encryption.
+  //
+  // @param value {any} Any json-serializable input.
+  // @param secret {Buffer(32)} Secret key, usually `crypto.randomBytes(32)`.
+  // @return blob {Buffer(16 + n)} Returns iv (16 bytes) + encrypted data blob.
+  encryptSymmetric(value, secret) {
+    return symmetric.encrypt(value, secret);
+  }
+
+  // Symmetric decryption.
+  //
+  // @param blob {Buffer(16 + n)} iv (16 bytes) + encrypted data input blob.
+  // @param secret {Buffer(32)} Secret key, usually `crypto.randomBytes(32)`.
+  // @return value {any} Decrypted value.
+  decryptSymmetric(blob, secret) {
+    return symmetric.decrypt(blob, secret);
   }
 
 }

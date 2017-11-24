@@ -1,112 +1,106 @@
-const c = console
-const BPrivacy = require('../src/b-privacy.js')
-const localStorageMock = {}
-let mnemonicTmp
-const { toHex0x, toBuffer } = require('../src/core');
+const B = require('../src/b-privacy.js')
+const { toHex0x } = require('../src/core');
+const { t, f } = require('./helpers');
+const _ = require('lodash');
 
-const examplePhrase = "aspect else project orient seed doll admit remind library turkey dutch inhale"
+const examplePhrase = 'aspect else project orient seed doll admit remind library turkey dutch inhale';
 
-test('initializes when given a valid mnemonic', () => {
-  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
-  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
-  expect(bp.isBrowser).toBe(true)
-  expect(bp.mnemonicKey.phrase).toEqual(mnemonicPhrase)
-})
+describe('B', function () {
 
-test('should fail when given a invalid mnemonic', () => {
-  const fakeMnemonicPhrase = "become reason clog below only pair identify combine tortoise pizza maple invalid"
-  expect(() => {
-    new BPrivacy({mnemonic: mnemonicPhrase});
-  }).toThrow();
-})
+  it('initializes when given a valid mnemonic', () => {
+    const mnemonic = B.generateMnemonicPhrase();
+    const b = new B({ mnemonic });
+    t(b.isBrowser, true);
+    t(b.mnemonicKey.phrase, mnemonic);
+  })
 
-test('should fail when not given a mnemonic', () => {
-  expect(() => {
-    new BPrivacy();
-  }).toThrow();
-})
+  it('should fail when given a invalid mnemonic', () => {
+    const mnemonic = 'become reason clog below only pair identify combine tortoise pizza maple invalid'
+    t(() => new B({ mnemonic }), Error, 'Should throw for fake mnemonic.');
+  })
 
-test('derives a mnemonic key when given a phrase', () => {
-  const firstMnemo = BPrivacy.generateMnemonicPhrase()
-  const bp = new BPrivacy({mnemonic: firstMnemo})
-  const secondMnemo = BPrivacy.generateMnemonicPhrase()
-  bp.deriveMnemonic(secondMnemo)
-  const derivedMnemo = bp.mnemonicKey.phrase
-  expect(derivedMnemo).toBeDefined()
-  expect(derivedMnemo.toString().split(/\s+/)).toHaveLength(12) // 12 words key/phrase
-  expect(derivedMnemo).toEqual(secondMnemo)
-  expect(derivedMnemo).not.toEqual(firstMnemo)
-})
+  it('should fail when not given a mnemonic', () => {
+    t(() => new B(), Error, 'Expected throw when no mnemonic provided.');
+  })
 
-test('generates a 12 work mnemoic phrase', () => {
-  const phrase = BPrivacy.generateMnemonicPhrase()
-  expect(phrase).toBeDefined()
-  expect(phrase.split(/\s+/)).toHaveLength(12)
-});
+  it('derives a mnemonic key when given a phrase', () => {
+    const firstMnemo = B.generateMnemonicPhrase()
+    const bp = new B({mnemonic: firstMnemo})
+    const secondMnemo = B.generateMnemonicPhrase()
+    bp.deriveMnemonic(secondMnemo)
+    const derivedMnemo = bp.mnemonicKey.phrase
+    t(derivedMnemo != null);
+    t(derivedMnemo.split(/\s+/).length, 12, '12 words phrase.');
+    t(derivedMnemo, secondMnemo);
+    f(derivedMnemo, firstMnemo);
+  })
 
-test('derives the first private key, public key and address', () => {
-  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
-  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
-  const key = bp.pvtKey
-  expect(key).toBeDefined()
-  // We use to 0x prefix for all
-  expect(toHex0x(key)).toHaveLength(66)
-  const pubKey = bp.pubKey
-  expect(pubKey).toBeDefined()
-  expect(toHex0x(pubKey)).toHaveLength(130)
-  const address = bp.address
-  expect(address).toBeDefined()
-  expect(address.toString()).toHaveLength(42)
-})
+  it('generates a 12 work mnemoic phrase', () => {
+    const phrase = B.generateMnemonicPhrase()
+    t(phrase != null);
+    t(phrase.split(/\s+/).length, 12, '12 words phrase.');
+  });
 
-test('signs a message', () => {
-  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
-  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
-  bp.deriveKey()
-  const signature = bp.sign("abc")
-  expect(signature).toBeDefined()
-  expect(signature.s).toBeDefined()
-  expect(signature.s).toHaveLength(32)
-  expect(signature.r).toBeDefined()
-  expect(signature.r).toHaveLength(32)
-  expect(signature.v).toBeDefined()
-  expect([27, 28]).toContain(signature.v)
-})
+  it('derives the first private key, public key and address', () => {
+    const mnemonic = B.generateMnemonicPhrase();
+    const bp = new B({ mnemonic });
+    const key = bp.pvtKey
+    t(key != null);
+    t(toHex0x(key).length, 2 + 2 * 32);
+    const pubKey = bp.pubKey
+    t(pubKey != null);
+    t(toHex0x(pubKey).length, 2 + 2 * 2 * 32);
+    const address = bp.address;
+    t(address != null);
+    t(typeof address, 'string');
+    t(address.length, 2 + 2 * 20);
+  })
 
-test("exposes sha3", () => {
-  const mnemonicPhrase = BPrivacy.generateMnemonicPhrase();
-  const bp = new BPrivacy({mnemonic: mnemonicPhrase})
-  const hash = bp.sha3("message123")
-  const expectedHash = "d860e63c5c69590c1a3184336cafdcd5ea84111b78268e71ed9a623d45be37fa"
+  it('signs a message', () => {
+    const mnemonic = B.generateMnemonicPhrase();
+    const bp = new B({ mnemonic })
+    bp.deriveKey();
+    const s = bp.sign('abc');
+    t(_.isObject(s));
+    t(_.sortBy(_.keys(s)), ['r', 's', 'v']);
+    t([27, 28].includes(s.v));
+    t(s.s.length, 32);
+    t(s.r.length, 32);
+    t(s.v != null);
+  })
 
-  expect(hash).toHaveLength(64)
-  expect(hash).toBe(expectedHash)
-})
+  it('exposes sha3', () => {
+    const mnemonic = B.generateMnemonicPhrase();
+    const bp = new B({ mnemonic });
+    const hash = bp.sha3('message123');
+    const expectedHash = 'd860e63c5c69590c1a3184336cafdcd5ea84111b78268e71ed9a623d45be37fa';
+    t(hash, expectedHash);
+  })
 
-test('derives the correct address (at index 0)', () => {
-  const bp = new BPrivacy({mnemonic: examplePhrase})
-  bp.deriveKey()
-  const address = bp.address
-  expect(address).toBeDefined()
-  expect(address.toString()).toBe("0xfdc7867dac261b3ee47fcd00b4f94a525ff5db1c")
-})
+  it('derives the correct address (at index 0)', () => {
+    const b = new B({ mnemonic: examplePhrase });
+    b.deriveKey();
+    t(b.address, '0xfdc7867dac261b3ee47fcd00b4f94a525ff5db1c');
+  })
 
-test('signs a message via web3Sign', () => {
-  const bp = new BPrivacy({mnemonic: examplePhrase})
-  bp.deriveKey()
-  const message = "a"
-  const msgSignature = bp.web3Sign(message)
-  const expectedSignature = "0x1c1931b8a3c91af0afae485d8ce5b597c5f2424f2bb3055b56e0204790047dd85379bce18b7279a04a1674d4bbfc302a5a68fb497da4a90bd924991bbeb7db1b1b"
+  it('signs a message via web3Sign', () => {
+    const bp = new B({ mnemonic: examplePhrase });
+    bp.deriveKey();
+    const message = 'a';
+    const msgSignature = bp.web3Sign(message);
+    const expectedSignature = '0x935080d1b2c7f748b9343250a4e7cb73cd812016a9782bb710810a96705d73b17aa9b6d3a27d8d902c9854327b4c74bedabb31bd34a741fd51fd90a6db894cbc1c';
 
-  expect(msgSignature).toBeDefined()
-  expect(msgSignature).toBe(msgSignature)
-  // example signed message parts - messageHash, msgSignature, signerAddress:
-  // c.log(`0x${bp.sha3(message)}`, messageSigned, bp.address)
-  // optput: 0x3ac225168df54212a25c1c01fd35bebfea408fdac2e31ddd6f80a4bbf9a5f1cb 0x1c1931b8a3c91af0afae485d8ce5b597c5f2424f2bb3055b56e0204790047dd85379bce18b7279a04a1674d4bbfc302a5a68fb497da4a90bd924991bbeb7db1b1b 0xfc86f571353e44568aa9103db4edd7f53a410c73
-})
+    t(msgSignature, expectedSignature);
 
-test('converts a public_key to an address', () => {
-  const bp = new BPrivacy({mnemonic: examplePhrase})
-  let staticAddress = BPrivacy.publicKeyToAddress(bp.pubKey);
-  expect(staticAddress).toEqual(bp.address);
+    // example signed message parts - messageHash, msgSignature, signerAddress:
+    // c.log(`0x${bp.sha3(message)}`, messageSigned, bp.address)
+    // optput: 0x3ac225168df54212a25c1c01fd35bebfea408fdac2e31ddd6f80a4bbf9a5f1cb 0x1c1931b8a3c91af0afae485d8ce5b597c5f2424f2bb3055b56e0204790047dd85379bce18b7279a04a1674d4bbfc302a5a68fb497da4a90bd924991bbeb7db1b1b 0xfc86f571353e44568aa9103db4edd7f53a410c73
+  })
+
+  it('converts a public_key to an address', () => {
+    const bp = new B({mnemonic: examplePhrase});
+    const staticAddress = B.publicKeyToAddress(bp.pubKey);
+    t(staticAddress, bp.address);
+  });
+
 });

@@ -58,8 +58,17 @@ function encrypt(input, _privateKey, _remoteKey) {
   ]);
 }
 
-function decrypt(data, privateKey) {
+function decrypt(data, privateKey, remotePublicKey) {
   const publicKey = data.slice(0, 65);
+
+  if (remotePublicKey) {
+    let compareKey = publicKey
+    // Remove \x04 prefix from publicKey if remotePublicKey does not have it
+    if (remotePublicKey.slice(0,1) !== '04') {
+      compareKey = compareKey.slice(1)
+    }
+    assert(remotePublicKey.equals(compareKey), 'Remote publicKey mismatch.');
+  }
 
   const ivData = data.slice(65, -32);
   const tag = data.slice(-32);

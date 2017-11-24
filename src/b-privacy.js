@@ -108,8 +108,8 @@ class BPrivacy {
     return encrypt(input, privateKey, remoteKey);
   }
 
-  static decrypt(input, privateKey) {
-    return decrypt(input, privateKey);
+  static decrypt(input, privateKey, remotePublicKey) {
+    return decrypt(input, privateKey, remotePublicKey);
   }
 
   // Encrypts `input` using `BPrivacy`'s private key and provided reader's
@@ -119,8 +119,8 @@ class BPrivacy {
   }
 
   // Decrypts `input` message using `BPrivacy`'s private key.
-  decrypt(input) {
-    return BPrivacy.decrypt(input, this.pvtKey);
+  decrypt(input, remotePublicKey) {
+    return BPrivacy.decrypt(input, this.pvtKey, remotePublicKey);
   }
 
   // Symmetric encryption.

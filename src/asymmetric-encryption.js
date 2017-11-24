@@ -42,7 +42,10 @@ function encrypt(input, _privateKey, _remoteKey) {
 
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv('aes-128-ctr', ekey, iv);
-  const encryptedData = cipher.update(data);
+  const encryptedData = Buffer.concat([
+    cipher.update(data),
+    cipher.final()
+  ]);
   const ivData = Buffer.concat([ iv, encryptedData ]);
 
   const tag = crypto.createHmac('sha256', mkey)
@@ -77,7 +80,10 @@ function decrypt(data, privateKey) {
   const iv = ivData.slice(0, 16);
   const encryptedData = ivData.slice(16);
   const decipher = crypto.createDecipheriv('aes-128-ctr', ekey, iv);
-  const decrypted = decipher.update(encryptedData);
+  const decrypted = Buffer.concat([
+    decipher.update(encryptedData),
+    decipher.final()
+  ]);
   return JSON.parse(decrypted.toString('utf8'));
 }
 

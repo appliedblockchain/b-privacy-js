@@ -98,9 +98,14 @@ describe('B', function () {
   })
 
   it('converts a public_key to an address', () => {
-    const bp = new B({mnemonic: examplePhrase});
+    const bp = new B({ mnemonic: examplePhrase });
     const staticAddress = B.publicKeyToAddress(bp.pubKey);
     t(staticAddress, bp.address);
+  });
+
+  it('should handle zero-padded private keys', () => {
+    const b = new B({ mnemonic: 'letter giraffe harvest lift test giraffe quit fiscal carpet armed script milk' });
+    t(b.pvtKey.toString('hex'), '00c22bc1b06fea6e01d24e5b3fce1f3bc07b180bc3f73d513330acc812142e90');
   });
 
 });

@@ -9,9 +9,10 @@ delete global._bitcore
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
-const { toHex0x, toBuffer } = require('./core');
+const { toHex0x } = require('./core');
 const { encrypt, decrypt } = require('./asymmetric-encryption');
 const symmetric = require('./symmetric-encryption');
+// const debug = require('debug')('b-privacy');
 
 class BPrivacy {
 
@@ -32,7 +33,7 @@ class BPrivacy {
       this.deriveMnemonic(mnemonic)
       this.deriveKey();
     } else {
-      throw Error("a mnemoic phrase was not provided")
+      throw Error("Mnemonic phrase was not provided.");
     }
   }
 
@@ -45,12 +46,12 @@ class BPrivacy {
   }
 
   deriveMnemonic(mnemonic) {
-    const wordlist = Mnemonic.Words.ENGLISH
-    const mnemonicKey = new Mnemonic(mnemonic, wordlist)
-    this.mnemonicKey = mnemonicKey
-    const hdKey = mnemonicKey.toHDPrivateKey()
-    this.hdKey = hdKey
-    return mnemonicKey
+    const wordlist = Mnemonic.Words.ENGLISH;
+    const mnemonicKey = new Mnemonic(mnemonic, wordlist);
+    this.mnemonicKey = mnemonicKey;
+    const hdKey = mnemonicKey.toHDPrivateKey();
+    this.hdKey = hdKey;
+    return mnemonicKey;
   }
 
   // derive first private key
@@ -60,13 +61,13 @@ class BPrivacy {
     const coinType = 60 // 60 - ethereum - *note4
     const change = 0 // 0 - false - private address
     const pathLevel = `44'/${coinType}'/${account}'/${change}` // *note2
-    const derivedChild = this.hdKey.derive(`m/${pathLevel}/${index}`)
+    const derivedChild = this.hdKey.derive(`m/${pathLevel}/${index}`);
     const pvtKey = derivedChild.privateKey
     this.pvtKeyBtc = pvtKey;
-    this.pvtKey = toBuffer(pvtKey.toString());
+    this.pvtKey = pvtKey.bn.toBuffer({ size: 32 });
     this.pubKey = this.deriveEthereumPublicKey();
-    this.keyIdx = index
-    this.address = this.deriveEthereumAddress()
+    this.keyIdx = index;
+    this.address = this.deriveEthereumAddress();
   }
 
   deriveEthereumPublicKey() {

@@ -1,4 +1,51 @@
 
+const assert = require('assert');
+const keccak = require('keccak');
+
+function toChecksumAddress(address) {
+  assert(isHex0x(address));
+  const hex = address.slice(2).toLowerCase();
+  const hash = keccak('keccak256').update(hex).digest('hex');
+  return '0x' + hex
+    .split('')
+    .map((c, i) => parseInt(hash[i], 16) >= 8 ? c.toUpperCase() : c)
+    .join('');
+}
+
+function bufferToKeccak256(buf) {
+  assert(Buffer.isBuffer(buf), `Expected Buffer, got ${typeof buf}.`);
+  return keccak('keccak256').update(buf).digest();
+}
+
+function hex0xToKeccak256(value) {
+  assert(isHex0x(value));
+  return bufferToHex0x(bufferToKeccak256(hex0xToBuffer(value)));
+}
+
+// Calcualtes keccak256 hash on hex0x or buffer `value`. Returns same type as input.
+//
+// @param value {hex0x|buffer} Input to hash.
+// @return {hex0x|buffer} keccak256 of `value`.
+function toKeccak256(value) {
+  if (isHex0x(value)) {
+    return hex0xToKeccak256(value);
+  }
+  if (isBuffer(value)) {
+    return bufferToKeccak256(value);
+  }
+  throw new TypeError(`Unknown input ${kindOf(value)}, expected hex0x or buffer.`);
+}
+
+function bufferToHex0x(value) {
+  assert(isBuffer(value));
+  return '0x' + value.toString('hex');
+}
+
+function hex0xToBuffer(value) {
+  assert(isHex0x(value));
+  return Buffer.from(value.slice(2), 'hex');
+}
+
 // Returns string describing kind of type of `value`, ie. `null` or `promise`.
 function kindOf(value) {
   if (typeof value !== 'object') {
@@ -101,7 +148,14 @@ function toBuffer(value) {
 }
 
 module.exports = {
+  toChecksumAddress,
+  bufferToKeccak256,
+  hex0xToKeccak256,
+  toKeccak256,
+  bufferToHex0x,
+  hex0xToBuffer,
   isBuffer,
+  isString,
   isHex,
   isHex0x,
   toBuffer,

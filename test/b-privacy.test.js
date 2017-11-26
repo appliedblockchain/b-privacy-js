@@ -113,4 +113,16 @@ describe('B', function () {
     t(b.address, '0xfdc7867DAc261b3EE47FCd00b4F94a525FF5DB1c');
   });
 
+  describe('ecsign', function () {
+
+    it('should sign and recover', () => {
+      const b = new B({ mnemonic: examplePhrase });
+      const hash = B.keccak256('abc');
+      const sig = b.ecsign(hash);
+      const address = B.ecrecoverAddress(hash, sig);
+      t(address, b.address);
+    });
+
+  });
+
 });

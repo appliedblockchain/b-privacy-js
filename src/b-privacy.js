@@ -9,10 +9,18 @@ delete global._bitcore
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('ethereum-bip44/es5')
 const util = require('ethereumjs-util')
-const { toHex0x } = require('./core');
 const { encrypt, decrypt } = require('./asymmetric-encryption');
 const symmetric = require('./symmetric-encryption');
-const toChecksumAddress = require('./to-checksum-address');
+const secp256k1 = require('secp256k1');
+const {
+  isBuffer,
+  bufferToKeccak256,
+  isString,
+  toChecksumAddress,
+  toHex0x,
+  toBuffer
+} = require('./core');
+
 // const debug = require('debug')('b-privacy');
 
 class BPrivacy {
@@ -42,8 +50,26 @@ class BPrivacy {
     return new Mnemonic().phrase;
   }
 
+  static keccak256(value) {
+    if (isBuffer(value)) {
+      return bufferToKeccak256(value);
+    }
+    if (isString(value)) {
+      return bufferToKeccak256(Buffer.from(value, 'utf8'));
+    }
+    throw new TypeError(`Invalid input type ${typeof value}.`);
+  }
+
+  static toChecksumAddress(address) {
+    return toChecksumAddress(address);
+  }
+
   static publicKeyToAddress(publicKey) {
     return toChecksumAddress(toHex0x(util.pubToAddress(toHex0x(publicKey), true)));
+  }
+
+  static areAddressesEqual(a, b) {
+    return toChecksumAddress(a) === toChecksumAddress(b);
   }
 
   deriveMnemonic(mnemonic) {
@@ -81,20 +107,67 @@ class BPrivacy {
     return toChecksumAddress(address);
   }
 
-  // returns a promise with one parameter, the message signature
+  // TODO: Remove, use ecsign(...).
   sign(message) {
-    const msgHash = util.sha3(message)
-
-    const signature = util.ecsign(msgHash, this.pvtKey)
-    return signature
+    const msgHash = util.sha3(message);
+    const signature = util.ecsign(msgHash, this.pvtKey);
+    return signature;
   }
 
+  // TODO: Remove, use ecsign(...).
   web3Sign(message) {
-    const signature = this.sign(message)
-    const r = signature.r.toString('hex')
-    const s = signature.s.toString('hex')
-    const v = Buffer.from([signature.v]).toString('hex')
-    return `0x${r}${s}${v}`
+    const sig = this.sign(message);
+    const r = sig.r.toString('hex');
+    const s = sig.s.toString('hex');
+    const v = Buffer.from([sig.v]).toString('hex');
+    return `0x${r}${s}${v}`;
+  }
+
+  // Signs message hash.
+  // @param hash {hex0x} keccak256 of the message.
+  // @returns {hex0x} ecsig (r + s + v blob).
+  ecsign(hash) {
+    const hashBuf = toBuffer(hash);
+    const { signature, recovery } = secp256k1.sign(hashBuf, this.pvtKey);
+    const r = signature.slice(0, 32).toString('hex');
+    const s = signature.slice(32, 64).toString('hex');
+    const v = Buffer.from([ recovery + 27 ]).toString('hex');
+    return '0x' + r + s + v;
+  }
+
+  // @param hash {hex0x} keccak256 of the message.
+  // @param sig {hex0x} Signature blob (message hash + r + s + v; 32 + 32 + 32 + 1 bytes).
+  // @returns {hex0x} Public key.
+  static ecrecover(hash, ecsig) {
+
+    // Get hash buffer.
+    const hashBuf = toBuffer(hash);
+    if (hashBuf.length !== 32) {
+      throw new TypeError(`Invalid message hash buffer length ${hashBuf.length}, expected 32.`);
+    }
+
+    // Parse ecsig hex0x into buffer.
+    const ecsigBuf = Buffer.from(ecsig.slice(2), 'hex');
+    if (ecsigBuf.length !== 32 + 32 + 1) {
+      throw new TypeError(`Invalid signature buffer length ${ecsigBuf.length}, expected (32 + 32 + 1).`);
+    }
+
+    // Extract signature (r + s) and recovery (v).
+    const signature = ecsigBuf.slice(0, 64);
+    const recovery = ecsigBuf[64] - 27;
+    if (recovery !== 0 && recovery !== 1) {
+      throw new Error('Invalid recovery value, expected 0 or 1.');
+    }
+
+    // Recover public key.
+    const publicKey = secp256k1.recover(hashBuf, signature, recovery);
+    return '0x' + secp256k1.publicKeyConvert(publicKey, false).slice(1).toString('hex');
+  }
+
+  static ecrecoverAddress(hash, ecsig) {
+    const publicKey = BPrivacy.ecrecover(hash, ecsig);
+    const address = BPrivacy.publicKeyToAddress(publicKey);
+    return address;
   }
 
   sha3(string) {

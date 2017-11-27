@@ -103,6 +103,17 @@ function isHex0x(value) {
   return isString(value) && value.startsWith('0x') && isHex(value.slice(2));
 }
 
+// Check if `value` represents bytes (hex, hex0x or buffer).
+function isBytes(value) {
+  if (isBuffer(value)) {
+    return true;
+  }
+  if (isString(value)) {
+    return value.startsWith('0x') ? isHex0x(value) : isHex(value);
+  }
+  return false;
+}
+
 // Check if `value` looks like `Promise/A+`, returns `true` or `false`.
 function isPromise(value) {
   return value !== null && typeof value === 'object' && typeof value.then === 'function';
@@ -148,6 +159,7 @@ function toBuffer(value) {
 }
 
 module.exports = {
+  isBytes,
   toChecksumAddress,
   bufferToKeccak256,
   hex0xToKeccak256,

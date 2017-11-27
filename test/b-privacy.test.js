@@ -1,7 +1,9 @@
 const B = require('../src/b-privacy.js')
-const { toHex0x } = require('../src/core');
+const { toHex0x, bufferToHex0x, hex0xToBuffer } = require('../src/core');
 const { t, f } = require('./helpers');
 const _ = require('lodash');
+const { randomBytes } = require('crypto');
+const debug = require('debug')('b-privacy:test');
 
 const examplePhrase = 'aspect else project orient seed doll admit remind library turkey dutch inhale';
 
@@ -123,6 +125,19 @@ describe('B', function () {
       t(address, b.address);
     });
 
+  });
+
+  describe('simulate sharing for multiple readers', () => {
+    const b = new B({ mnemonic: examplePhrase });
+    const secret = randomBytes(32);
+    const msg = { hello: 'world' };
+    const blob = b.encryptSymmetric(msg, secret);
+    const readerBlob = b.encrypt(bufferToHex0x(secret), b.publicKey);
+    debug('b.encrypt -> readerBlob', readerBlob);
+    const decryptedSecret = hex0xToBuffer(b.decrypt(readerBlob));
+    t(toHex0x(decryptedSecret), toHex0x(secret));
+    const decryptedMsg = b.decryptSymmetric(blob, secret);
+    t(decryptedMsg, msg);
   });
 
 });

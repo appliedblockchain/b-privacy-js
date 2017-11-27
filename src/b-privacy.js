@@ -13,19 +13,23 @@ const { encrypt, decrypt } = require('./asymmetric-encryption');
 const symmetric = require('./symmetric-encryption');
 const secp256k1 = require('secp256k1');
 const {
+  isBytes,
   isBuffer,
   bufferToKeccak256,
   isString,
   toChecksumAddress,
   toHex0x,
-  toBuffer
+  toHex,
+  toBuffer,
+  kindOf
 } = require('./core');
+const assert = require('assert');
 
 // const debug = require('debug')('b-privacy');
 
 class BPrivacy {
 
-  constructor({mnemonic = null, isBrowser = true}) {
+  constructor({ mnemonic = null, isBrowser = true }) {
     // logging - change to `this.log = true/false` to enable/suppress logs
     this.log = false
     // defines whether we're running in the browser or on a mobile environment (React-Native)
@@ -95,6 +99,24 @@ class BPrivacy {
     this.pubKey = this.deriveEthereumPublicKey();
     this.keyIdx = index;
     this.address = this.deriveEthereumAddress();
+  }
+
+  // @returns {buffer} Public key, uncompressed format.
+  get publicKey() {
+    return this.pubKey;
+  }
+
+  getPublicKey(encoding) {
+    switch (encoding) {
+      case 'buffer':
+        return this.publicKey;
+      case 'hex0x':
+        return toHex0x(this.publicKey);
+      case 'hex':
+        return toHex(this.publicKey);
+      default:
+        throw new TypeError(`Unknown encoding ${encoding}, expected "buffer", "hex0x" or "hex".`);
+    }
   }
 
   deriveEthereumPublicKey() {
@@ -189,6 +211,7 @@ class BPrivacy {
   // Encrypts `input` using `BPrivacy`'s private key and provided reader's
   // remote `publicKey`.
   encrypt(input, remoteKey) {
+    assert(isBytes(remoteKey), `Remote key must represent bytes (hex, hex0x or buffer), got ${kindOf(remoteKey)}.`);
     return BPrivacy.encrypt(input, this.pvtKey, remoteKey);
   }
 

@@ -2,6 +2,9 @@
 const assert = require('assert');
 const elliptic = require('elliptic');
 const crypto = require('crypto');
+const { toBuffer, toHex0x } = require('./core');
+
+const debug = require('debug')('b-privacy:asmmetric-encryption');
 
 const ec = elliptic.ec('secp256k1');
 
@@ -20,18 +23,27 @@ function kdf(keyMaterial, keyLength) {
 
 // Encrypts `input` JSON message using `privateKey` and `remoteKey` public key.
 function encrypt(input, _privateKey, _remoteKey) {
+
+  // Serialize input.
   const data = Buffer.from(JSON.stringify(input), 'utf8');
 
   // We'll work on buffer for private key.
-  const privateKey = _privateKey;
+  const privateKey = toBuffer(_privateKey);
 
   // We'll work on buffer for remote public key.
-  const remoteKey = _remoteKey;
+  const remoteKey = toBuffer(_remoteKey);
+
+  // Make sure we've got x and y in public key.
+  // TODO: Double check if this is correct, I believe you can derive y from x. [mr]
+  assert(remoteKey.length === 2 * 32, `Invalid remote public key length ${remoteKey.length}, expected (2 * 32) bytes.`);
+
+  const x = remoteKey.slice(0, 32);
+  const y = remoteKey.slice(32, 64);
 
   // Derive secret.
   const secret = ec.keyFromPrivate(privateKey)
-    .derive(ec.keyFromPublic({x: remoteKey.slice(0,32), y: remoteKey.slice(32,remoteKey.length)}).getPublic())
-    .toArrayLike(Buffer);
+    .derive(ec.keyFromPublic({ x, y }).getPublic())
+    .toArrayLike(Buffer, 'be', 32);
 
   const key = kdf(secret, 32);
   const ekey = key.slice(0, 16);
@@ -51,14 +63,24 @@ function encrypt(input, _privateKey, _remoteKey) {
     .update(ivData)
     .digest();
 
-  return Buffer.concat([
+  debug('encrypt', { tag });
+
+  const output = Buffer.concat([
     Buffer.from(ec.keyFromPrivate(privateKey).getPublic('hex'), 'hex'),
     ivData,
     tag
   ]);
+
+  // const result = toHex0x(output);
+
+  return output;
 }
 
-function decrypt(data, privateKey) {
+function decrypt(input, privateKey) {
+
+  // Let's work on buffer.
+  const data = toBuffer(input);
+
   const publicKey = data.slice(0, 65);
 
   const ivData = data.slice(65, -32);
@@ -74,7 +96,8 @@ function decrypt(data, privateKey) {
   const mkey = crypto.createHash('sha256').update(key.slice(16, 32)).digest();
 
   const tag2 = crypto.createHmac('sha256', mkey).update(ivData).digest();
-  assert(tag2.equals(tag), 'Tag mismatch.');
+  debug('decrypt', { tag, tag2 });
+  assert(tag2.equals(tag), `Tag mismatch.`);
 
   const iv = ivData.slice(0, 16);
   const encryptedData = ivData.slice(16);

@@ -7,7 +7,7 @@ delete global._bitcore
 // const PrivateKey = bitcore.PrivateKey
 // const Random = require('bitcore-lib/lib/crypto/random')
 const Mnemonic = require('bitcore-mnemonic')
-const EthereumBip44 = require('ethereum-bip44/es5')
+const EthereumBip44 = require('./ethereum-bip44')
 const util = require('ethereumjs-util')
 const { encrypt, decrypt } = require('./asymmetric-encryption');
 const symmetric = require('./symmetric-encryption');

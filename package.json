@@ -7,7 +7,6 @@
     "bitcore-lib": "^0.15.0",
     "bitcore-mnemonic": "^1.2.5",
     "elliptic": "^6.4.0",
-    "ethereum-bip44": "git+https://github.com/appliedblockchain/ethereum-bip44.git#update-bitcore-lib",
     "ethereumjs-util": "^5.1.2"
   },
   "devDependencies": {

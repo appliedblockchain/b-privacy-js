@@ -10,16 +10,14 @@
     "ethereumjs-util": "^5.1.2"
   },
   "devDependencies": {
-    "bubleify": "^0.7.0",
-    "eslint": "^4.10.0",
-    "jest": "^20.0.4",
+    "bubleify": "^1.0.0",
+    "eslint": "^4.12.0",
     "watchify": "^3.9.0"
   },
   "scripts": {
     "build": "browserify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
     "dev": "watchify src/b-privacy.js -o dist/b-privacy.js -t bubleify",
-    "test": "jest",
-    "pretest": "npm run build",
+    "test": "mocha",
     "browserify": "browserify",
     "bubleify": "bubleify"
   },

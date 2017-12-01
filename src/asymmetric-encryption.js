@@ -89,7 +89,7 @@ function decrypt(input, privateKey) {
   // Derive secret.
   const secret = ec.keyFromPrivate(privateKey)
     .derive(ec.keyFromPublic(publicKey).getPublic())
-    .toArrayLike(Buffer)
+    .toArrayLike(Buffer, 'be', 32)
 
   const key = kdf(secret, 32)
   const ekey = key.slice(0, 16)

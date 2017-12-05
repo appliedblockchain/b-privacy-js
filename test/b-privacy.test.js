@@ -1,5 +1,7 @@
 const B = require('../src/b-privacy.js')
-const { toHex0x, bufferToHex0x, hex0xToBuffer } = require('../src/core')
+const toHex0x = require('../src/core/to-hex0x')
+const bufferToHex0x = require('../src/core/buffer-to-hex0x')
+const hex0xToBuffer = require('../src/core/hex0x-to-buffer')
 const { t, f } = require('./helpers')
 const _ = require('lodash')
 const { randomBytes } = require('crypto')

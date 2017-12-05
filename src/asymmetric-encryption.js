@@ -2,7 +2,7 @@
 const assert = require('assert')
 const elliptic = require('elliptic')
 const crypto = require('crypto')
-const { toBuffer } = require('./core')
+const toBuffer = require('./core/to-buffer')
 
 const debug = require('debug')('b-privacy:asmmetric-encryption')
 

@@ -12,18 +12,19 @@ const util = require('ethereumjs-util')
 const { encrypt, decrypt } = require('./asymmetric-encryption')
 const symmetric = require('./symmetric-encryption')
 const secp256k1 = require('secp256k1')
-const {
-  isBytes,
-  isBuffer,
-  bufferToKeccak256,
-  isString,
-  toChecksumAddress,
-  toHex0x,
-  toHex,
-  toBuffer,
-  kindOf
-} = require('./core')
 const assert = require('assert')
+
+const areAddressesEqual = require('./core/are-addresses-equal')
+const bufferToKeccak256 = require('./core/buffer-to-keccak256')
+const callHash = require('./core/call-hash')
+const isBuffer = require('./core/is-buffer')
+const isPublicKey = require('./core/is-public-key')
+const isString = require('./core/is-string')
+const kindOf = require('./core/kind-of')
+const toBuffer = require('./core/to-buffer')
+const toChecksumAddress = require('./core/to-checksum-address')
+const toHex = require('./core/to-hex')
+const toHex0x = require('./core/to-hex0x')
 
 // const debug = require('debug')('b-privacy')
 
@@ -54,6 +55,7 @@ class BPrivacy {
     return new Mnemonic().phrase
   }
 
+  // TODO: Remove me.
   static keccak256(value) {
     if (isBuffer(value)) {
       return bufferToKeccak256(value)
@@ -211,10 +213,15 @@ class BPrivacy {
     return decrypt(input, privateKey)
   }
 
-  // Encrypts `input` using `BPrivacy`'s private key and provided reader's
-  // remote `publicKey`.
+  /**
+   * Encrypts `value` using `this.privateKey` and provided reader's public key (`remoteKey`).
+   *
+   * @param {any} input     [description]
+   * @param {buffer | hex | hex0x} remoteKey
+   * @return {buffer}
+   */
   encrypt(input, remoteKey) {
-    assert(isBytes(remoteKey), `Remote key must represent bytes (hex, hex0x or buffer), got ${kindOf(remoteKey)}.`)
+    assert(isPublicKey(remoteKey), `Invalid remote public key, got ${kindOf(remoteKey)}.`)
     return BPrivacy.encrypt(input, this.pvtKey, remoteKey)
   }
 
@@ -239,6 +246,18 @@ class BPrivacy {
   // @return value {any} Decrypted value.
   decryptSymmetric(blob, secret) {
     return symmetric.decrypt(blob, secret)
+  }
+
+  callSignature(...args) {
+    const hash = callHash(...args)
+    const sig = this.ecsign(hash)
+    return sig
+  }
+
+  verifyCallSignature(sig, ...args) {
+    const hash = callHash(...args)
+    const address = this.ecrecoverAddress(hash, sig)
+    return areAddressesEqual(this.address, address)
   }
 
 }

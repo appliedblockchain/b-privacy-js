@@ -239,7 +239,7 @@ class BPrivacy {
   // @param value {any} Any json-serializable input.
   // @param secret {Buffer(32)} Secret key, usually `crypto.randomBytes(32)`.
   // @return blob {Buffer(16 + n)} Returns iv (16 bytes) + encrypted data blob.
-  encryptSymmetric(value, secret) {
+  static encryptSymmetric(value, secret) {
     return symmetric.encrypt(value, secret)
   }
 
@@ -248,8 +248,18 @@ class BPrivacy {
   // @param blob {Buffer(16 + n)} iv (16 bytes) + encrypted data input blob.
   // @param secret {Buffer(32)} Secret key, usually `crypto.randomBytes(32)`.
   // @return value {any} Decrypted value.
-  decryptSymmetric(blob, secret) {
+  static decryptSymmetric(blob, secret) {
     return symmetric.decrypt(blob, secret)
+  }
+
+  // TODO: Remove me.
+  encryptSymmetric(...args) {
+    return BPrivacy.encryptSymmetric(...args)
+  }
+
+  // TODO: Remove me.
+  decryptSymmetric(...args) {
+    return BPrivacy.decryptSymmetric(...args)
   }
 
   callSignature(...args) {

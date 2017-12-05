@@ -4,7 +4,7 @@ const bufferToHex0x = require('../src/core/buffer-to-hex0x')
 const hex0xToBuffer = require('../src/core/hex0x-to-buffer')
 const { t, f } = require('./helpers')
 const _ = require('lodash')
-const { randomBytes } = require('crypto')
+const randomBytes = require('../src/core/random-bytes')
 const debug = require('debug')('b-privacy:test')
 
 const examplePhrase = 'aspect else project orient seed doll admit remind library turkey dutch inhale'
@@ -152,6 +152,17 @@ describe('B', function () {
       t(b.verifyCallSignature(sig, ...args))
       f(b.verifyCallSignature(sig, 'x', ...args))
       f(a.verifyCallSignature(sig, ...args))
+    })
+
+  })
+
+  describe('symmetric encryption/decryption', () => {
+
+    it('should work for simple case', () => {
+      const secret = randomBytes(32)
+      const blob = B.encryptSymmetric({ msg: 'foo+bar' }, secret)
+      const msg = B.decryptSymmetric(blob, secret)
+      t(msg, { msg: 'foo+bar' })
     })
 
   })

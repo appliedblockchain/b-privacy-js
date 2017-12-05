@@ -145,11 +145,13 @@ describe('B', function () {
   describe('call sig', () => {
 
     it('should create call signature', () => {
+      const a = new B({ mnemonic: B.generateMnemonicPhrase() })
       const b = new B({ mnemonic: examplePhrase })
       const args = ['foo', 'hello', true, 42]
       const sig = b.callSignature(...args)
       t(b.verifyCallSignature(sig, ...args))
       f(b.verifyCallSignature(sig, 'x', ...args))
+      f(a.verifyCallSignature(sig, ...args))
     })
 
   })

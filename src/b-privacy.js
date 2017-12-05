@@ -106,6 +106,10 @@ class BPrivacy {
     this.address = this.deriveEthereumAddress()
   }
 
+  get privateKey() {
+    return this.pvtKey
+  }
+
   // @returns {buffer} Public key, uncompressed format.
   get publicKey() {
     return this.pubKey
@@ -256,7 +260,7 @@ class BPrivacy {
 
   verifyCallSignature(sig, ...args) {
     const hash = callHash(...args)
-    const address = this.ecrecoverAddress(hash, sig)
+    const address = BPrivacy.ecrecoverAddress(hash, sig)
     return areAddressesEqual(this.address, address)
   }
 

@@ -1,11 +1,8 @@
-const c = console
+
 // Hacky but fixes the Error: More than one instance of bitcore-lib found.
+// TODO: Remove me? [mirek]
 delete global._bitcore
-// const bitcore = require('bitcore-lib')
-// const bitcore = require('bitcore-lib')
-// const HDPrivateKey = bitcore.HDPrivateKey
-// const PrivateKey = bitcore.PrivateKey
-// const Random = require('bitcore-lib/lib/crypto/random')
+
 const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('./ethereum-bip44')
 const util = require('ethereumjs-util')
@@ -26,20 +23,30 @@ const isPublicKey = require('./core/is-public-key')
 const isString = require('./core/is-string')
 const kindOf = require('./core/kind-of')
 const randomBytes = require('./core/random-bytes')
-const toBuffer = require('./core/to-buffer')
+const bytesToBuffer = require('./core/bytes-to-buffer')
 const toChecksumAddress = require('./core/to-checksum-address')
-const toHex = require('./core/to-hex')
+const bufferToHex = require('./core/to-hex')
 const toHex0x = require('./core/to-hex0x')
 
 // const debug = require('debug')('b-privacy')
 
 class BPrivacy {
 
-  constructor({ mnemonic = null, isBrowser = true }) {
-    // logging - change to `this.log = true/false` to enable/suppress logs
-    this.log = false
-    // defines whether we're running in the browser or on a mobile environment (React-Native)
-    this.isBrowser = isBrowser
+  static fromMnemonic(mnemonic) {
+    return new BPrivacy({ mnemonic })
+  }
+
+  static generate() {
+    return new BPrivacy()
+  }
+
+  constructor({ mnemonic = null } = {}) {
+
+    // Set mnemonic phrase if it hasn't been provided.
+    if (mnemonic == null) {
+      mnemonic = BPrivacy.generateMnemonicPhrase()
+    }
+
     // all instance variables/attributes (for reference)
     this.hdKey = null
     this.mnemonicKey = null
@@ -71,16 +78,22 @@ class BPrivacy {
     throw new TypeError(`Invalid input type ${typeof value}.`)
   }
 
-  static toChecksumAddress(address) {
-    return toChecksumAddress(address)
+  /**
+   * @see toChecksumAddress
+   */
+  static toChecksumAddress(...args) {
+    return toChecksumAddress(...args)
   }
 
   static publicKeyToAddress(publicKey) {
     return toChecksumAddress(toHex0x(util.pubToAddress(toHex0x(publicKey), true)))
   }
 
-  static areAddressesEqual(a, b) {
-    return toChecksumAddress(a) === toChecksumAddress(b)
+  /**
+   * @see areAddressesEqual
+   */
+  static areAddressesEqual(...args) {
+    return areAddressesEqual(...args)
   }
 
   deriveMnemonic(mnemonic) {
@@ -111,59 +124,89 @@ class BPrivacy {
     this.address = this.deriveEthereumAddress()
   }
 
+  /**
+   * Returns private key as buffer. Use `getPrivateKey` if you want to get other format directly.
+   *
+   * @see getPrivateKey
+   *
+   * @return {buffer}
+   */
   get privateKey() {
     return this.pvtKey
   }
 
-  // @returns {buffer} Public key, uncompressed format.
+  /**
+   * Returns public key as buffer. Use `getPublicKey` if you want to get other format directly.
+   *
+   * @see getPublicKey
+   *
+   * @return {buffer}
+   */
   get publicKey() {
     return this.pubKey
   }
 
-  getPublicKey(encoding) {
-    switch (encoding) {
+  /**
+   * Returns private key in specified `format`.
+   *
+   * @param {string} [format='hex0x'] One of `buffer`, `hex0x` or `hex`.
+   * @return {buffer | hex0x | hex}
+   */
+  getPrivateKey(format = 'hex0x') {
+    switch (format) {
       case 'buffer':
-        return this.publicKey
+        return this.privateKey
       case 'hex0x':
-        return toHex0x(this.publicKey)
+        return bufferToHex0x(this.privateKey)
       case 'hex':
-        return toHex(this.publicKey)
+        return bufferToHex(this.privateKey)
       default:
-        throw new TypeError(`Unknown encoding ${encoding}, expected "buffer", "hex0x" or "hex".`)
+        throw new TypeError(`Unknown ${format} format, expected "buffer", "hex0x" or "hex".`)
     }
   }
 
+  /**
+   * Returns public key in specified `format`.
+   *
+   * @param {string} [format='hex0x'] One of `buffer`, `hex0x` or `hex`.
+   * @return {buffer | hex0x | hex}
+   */
+  getPublicKey(format = 'hex0x') {
+    switch (format) {
+      case 'buffer':
+        return this.publicKey
+      case 'hex0x':
+        return bufferToHex0x(this.publicKey)
+      case 'hex':
+        return bufferToHex(this.publicKey)
+      default:
+        throw new TypeError(`Unknown ${format} format, expected "buffer", "hex0x" or "hex".`)
+    }
+  }
+
+  // TODO: Remove me.
   deriveEthereumPublicKey() {
     return util.privateToPublic(this.pvtKey)
   }
 
+  // TODO: Remove me.
   deriveEthereumAddress() {
     const eBip44 = EthereumBip44.fromPrivateSeed(this.hdKey.toString())
     const address = eBip44.getAddress(this.keyIdx)
     return toChecksumAddress(address)
   }
 
-  // TODO: Remove, use ecsign(...).
-  sign(message) {
-    const msgHash = util.sha3(message)
-    const signature = util.ecsign(msgHash, this.pvtKey)
-    return signature
-  }
-
-  // TODO: Remove, use ecsign(...).
-  web3Sign(message) {
-    const sig = this.sign(message)
-    const r = sig.r.toString('hex')
-    const s = sig.s.toString('hex')
-    const v = Buffer.from([sig.v]).toString('hex')
-    return `0x${r}${s}${v}`
-  }
-
-  // Signs message hash.
-  // @param hash {hex0x} keccak256 of the message.
-  // @returns {hex0x} ecsig (r + s + v blob).
+  /**
+   * Generates signature for provided message `hash`.
+   *
+   * @param {bytes32} hash
+   * @return {hex0x}
+   */
   ecsign(hash) {
-    const hashBuf = toBuffer(hash)
+    const hashBuf = bytesToBuffer(hash)
+    if (hashBuf.length !== 32) {
+      throw new TypeError(`Invalid message hash length ${hashBuf.length}, expected 32.`)
+    }
     const { signature, recovery } = secp256k1.sign(hashBuf, this.pvtKey)
     const r = signature.slice(0, 32).toString('hex')
     const s = signature.slice(32, 64).toString('hex')
@@ -171,19 +214,23 @@ class BPrivacy {
     return '0x' + r + s + v
   }
 
-  // @param hash {hex0x} keccak256 of the message.
-  // @param sig {hex0x} Signature blob (message hash + r + s + v; 32 + 32 + 32 + 1 bytes).
-  // @returns {hex0x} Public key.
+  /**
+   * Recovers public key from `ecsig` signature and message `hash`.
+   *
+   * @param {bytes32} hash Message hash.
+   * @param {bytes97} ecsig Signature blob (r + s + v; 32 + 32 + 32 + 1 bytes).
+   * @return {hex0x} Recovered public key.
+   */
   static ecrecover(hash, ecsig) {
 
     // Get hash buffer.
-    const hashBuf = toBuffer(hash)
+    const hashBuf = bytesToBuffer(hash)
     if (hashBuf.length !== 32) {
       throw new TypeError(`Invalid message hash buffer length ${hashBuf.length}, expected 32.`)
     }
 
     // Parse ecsig hex0x into buffer.
-    const ecsigBuf = Buffer.from(ecsig.slice(2), 'hex')
+    const ecsigBuf = bytesToBuffer(ecsig)
     if (ecsigBuf.length !== 32 + 32 + 1) {
       throw new TypeError(`Invalid signature buffer length ${ecsigBuf.length}, expected (32 + 32 + 1).`)
     }
@@ -200,26 +247,48 @@ class BPrivacy {
     return '0x' + secp256k1.publicKeyConvert(publicKey, false).slice(1).toString('hex')
   }
 
-  static ecrecoverAddress(hash, ecsig) {
-    const publicKey = BPrivacy.ecrecover(hash, ecsig)
+  /**
+   * Verifies `sig` signature and message `hash` against `this`.
+   *
+   * @param {bytes32} hash
+   * @param {bytes97} sig
+   * @return {boolean}
+   */
+  ecverify(hash, sig) {
+    const address = BPrivacy.ecrecoverAddress(hash, sig)
+    return areAddressesEqual(this.address, address)
+  }
+
+  /**
+   * Recovers ethereum address from `sig` signature and message `hash`.
+   *
+   * @param {bytes32} hash
+   * @param {bytes97} sig
+   * @return {address}
+   */
+  static ecrecoverAddress(hash, sig) {
+    const publicKey = BPrivacy.ecrecover(hash, sig)
     const address = BPrivacy.publicKeyToAddress(publicKey)
     return address
   }
 
+  // TODO: Remove.
   sha3(string) {
     return util.sha3(string).toString('hex')
   }
 
-  _p(message) {
-    if (this.log) c.log(message.toString())
+  /**
+   * @see encrypt
+   */
+  static encrypt(...args) {
+    return encrypt(...args)
   }
 
-  static encrypt(input, privateKey, remoteKey) {
-    return encrypt(input, privateKey, remoteKey)
-  }
-
-  static decrypt(input, privateKey) {
-    return decrypt(input, privateKey)
+  /**
+   * @see decrypt
+   */
+  static decrypt(...args) {
+    return decrypt(...args)
   }
 
   /**
@@ -234,7 +303,12 @@ class BPrivacy {
     return BPrivacy.encrypt(input, this.pvtKey, remoteKey)
   }
 
-  // Decrypts `input` message using `BPrivacy`'s private key.
+  /**
+   * Decrypts `input` blob using `this` private key.
+   *
+   * @param {bytes} input Encrypted blob.
+   * @return {any} Decrypted message.
+   */
   decrypt(input) {
     return BPrivacy.decrypt(input, this.pvtKey)
   }

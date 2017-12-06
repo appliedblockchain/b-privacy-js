@@ -3,8 +3,8 @@ const toHex0x = require('../src/core/to-hex0x')
 const bufferToHex0x = require('../src/core/buffer-to-hex0x')
 const hex0xToBuffer = require('../src/core/hex0x-to-buffer')
 const { t, f } = require('./helpers')
-const _ = require('lodash')
 const randomBytes = require('../src/core/random-bytes')
+const utf8ToKeccak256 = require('../src/core/utf8-to-keccak256')
 const debug = require('debug')('b-privacy:test')
 
 const examplePhrase = 'aspect else project orient seed doll admit remind library turkey dutch inhale'
@@ -14,17 +14,12 @@ describe('B', function () {
   it('initializes when given a valid mnemonic', () => {
     const mnemonic = B.generateMnemonicPhrase()
     const b = new B({ mnemonic })
-    t(b.isBrowser, true)
     t(b.mnemonicKey.phrase, mnemonic)
   })
 
   it('should fail when given a invalid mnemonic', () => {
     const mnemonic = 'become reason clog below only pair identify combine tortoise pizza maple invalid'
     t(() => new B({ mnemonic }), Error, 'Should throw for fake mnemonic.')
-  })
-
-  it('should fail when not given a mnemonic', () => {
-    t(() => new B(), Error, 'Expected throw when no mnemonic provided.')
   })
 
   it('derives a mnemonic key when given a phrase', () => {
@@ -61,16 +56,13 @@ describe('B', function () {
   })
 
   it('signs a message', () => {
-    const mnemonic = B.generateMnemonicPhrase()
-    const bp = new B({ mnemonic })
-    bp.deriveKey()
-    const s = bp.sign('abc')
-    t(_.isObject(s))
-    t(_.sortBy(_.keys(s)), ['r', 's', 'v'])
-    t([27, 28].includes(s.v))
-    t(s.s.length, 32)
-    t(s.r.length, 32)
-    t(s.v != null)
+    const a = B.generate()
+    const b = B.generate()
+    const msg = 'Hello world.'
+    const hash = utf8ToKeccak256(msg)
+    const sig = a.ecsign(hash)
+    t(a.ecverify(hash, sig))
+    f(b.ecverify(hash, sig))
   })
 
   it('exposes sha3', () => {
@@ -87,18 +79,13 @@ describe('B', function () {
     t(b.address, '0xfdc7867DAc261b3EE47FCd00b4F94a525FF5DB1c')
   })
 
-  it('signs a message via web3Sign', () => {
-    const bp = new B({ mnemonic: examplePhrase })
-    bp.deriveKey()
-    const message = 'a'
-    const msgSignature = bp.web3Sign(message)
-    const expectedSignature = '0x935080d1b2c7f748b9343250a4e7cb73cd812016a9782bb710810a96705d73b17aa9b6d3a27d8d902c9854327b4c74bedabb31bd34a741fd51fd90a6db894cbc1c'
-
-    t(msgSignature, expectedSignature)
-
-    // example signed message parts - messageHash, msgSignature, signerAddress:
-    // c.log(`0x${bp.sha3(message)}`, messageSigned, bp.address)
-    // optput: 0x3ac225168df54212a25c1c01fd35bebfea408fdac2e31ddd6f80a4bbf9a5f1cb 0x1c1931b8a3c91af0afae485d8ce5b597c5f2424f2bb3055b56e0204790047dd85379bce18b7279a04a1674d4bbfc302a5a68fb497da4a90bd924991bbeb7db1b1b 0xfc86f571353e44568aa9103db4edd7f53a410c73
+  it('signs with known signature', () => {
+    const a = B.fromMnemonic(examplePhrase)
+    a.deriveKey()
+    const msg = 'a'
+    const sig = a.ecsign(utf8ToKeccak256(msg))
+    const expectedSig = '0x935080d1b2c7f748b9343250a4e7cb73cd812016a9782bb710810a96705d73b17aa9b6d3a27d8d902c9854327b4c74bedabb31bd34a741fd51fd90a6db894cbc1c'
+    t(sig, expectedSig)
   })
 
   it('converts a public_key to an address', () => {

@@ -133,12 +133,12 @@ describe('B', function () {
     const b = new B({ mnemonic: examplePhrase })
     const secret = randomBytes(32)
     const msg = { hello: 'world' }
-    const blob = b.encryptSymmetric(msg, secret)
+    const blob = B.encryptSymmetric(msg, secret)
     const readerBlob = b.encrypt(bufferToHex0x(secret), b.publicKey)
     debug('b.encrypt -> readerBlob', readerBlob)
     const decryptedSecret = hex0xToBuffer(b.decrypt(readerBlob))
     t(toHex0x(decryptedSecret), toHex0x(secret))
-    const decryptedMsg = b.decryptSymmetric(blob, secret)
+    const decryptedMsg = B.decryptSymmetric(blob, secret)
     t(decryptedMsg, msg)
   })
 

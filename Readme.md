@@ -12,6 +12,22 @@ Supports:
 * --verifying signature `b.verify(s, a.publicKey)`--
 * deriving address from public key `B.publicKeyToAddress(publicKey)`
 
+## Conventions
+
+We call `bytes` any byte representation: buffer, hex0x or hex.
+
+`bytesTo*` family functions convert from one of known byte representations to specified one.
+
+`to*` family functions will try to convert from any input into desired byte representation, when possible making
+the same conversions as seen in solidity, ie.:
+
+    toBuffer('hello') // returns buffer with utf8 representation of the input string
+    toBuffer(true) // returns 32 byte, big-endian number 1
+    toBuffer(false) // returns 32 byte number 0
+    toBuffer(null) // throws
+    toBuffer('0x01') // returns one byte buffer
+    toBuffer('ffff') // returns two byte buffer
+
 ## Installation
 
     npm i -D git+ssh://git@github.com:appliedblockchain/b-privacy-js.git#v0.2.1

@@ -167,4 +167,22 @@ describe('B', function () {
 
   })
 
+  describe('encryption for sharing', () => {
+
+    it('should work', () => {
+      const a = new B({ mnemonic: B.generateMnemonicPhrase() })
+      const b = new B({ mnemonic: B.generateMnemonicPhrase() })
+
+      const [ blob, aReaderBlob ] = a.encryptShared({ hello: 'world' })
+      t(a.decryptShared(blob, aReaderBlob), { hello: 'world' })
+      t(() => b.decryptShared(blob, aReaderBlob), 'Tag mismatch.')
+
+      // Share secret with b.
+      const bReaderBlob = a.shareSecret(aReaderBlob, b.publicKey)
+      t(b.decryptShared(blob, bReaderBlob), { hello: 'world' })
+      t(() => a.decryptShared(blob, bReaderBlob), 'Tag mismatch.')
+    })
+
+  })
+
 })

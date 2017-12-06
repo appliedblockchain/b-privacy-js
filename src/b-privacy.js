@@ -15,12 +15,16 @@ const secp256k1 = require('secp256k1')
 const assert = require('assert')
 
 const areAddressesEqual = require('./core/are-addresses-equal')
+const bufferToHex0x = require('./core/buffer-to-hex0x')
 const bufferToKeccak256 = require('./core/buffer-to-keccak256')
 const callHash = require('./core/call-hash')
+const hex0xToBuffer = require('./core/hex0x-to-buffer')
 const isBuffer = require('./core/is-buffer')
+const isHex0x = require('./core/is-hex0x')
 const isPublicKey = require('./core/is-public-key')
 const isString = require('./core/is-string')
 const kindOf = require('./core/kind-of')
+const randomBytes = require('./core/random-bytes')
 const toBuffer = require('./core/to-buffer')
 const toChecksumAddress = require('./core/to-checksum-address')
 const toHex = require('./core/to-hex')
@@ -272,6 +276,50 @@ class BPrivacy {
     const hash = callHash(...args)
     const address = BPrivacy.ecrecoverAddress(hash, sig)
     return areAddressesEqual(this.address, address)
+  }
+
+  /**
+   * Encrypts `value` with encrypted secret.
+   *
+   * Returns a tuple with encrypted data (blob) and encrypted secret (readerBlob) to decode that data.
+   *
+   * @param {any} value
+   * @return {[ blob, readerBlob ]}
+   */
+  encryptShared(value) {
+    const secret = randomBytes(32)
+    const blob = this.encryptSymmetric(value, secret)
+    const readerBlob = this.encrypt(bufferToHex0x(secret), this.publicKey)
+    return [ blob, readerBlob ]
+  }
+
+  /**
+   * Decrypts `blob` using shared secret encrypted in `readerBlob`.
+   *
+   * @param {buffer | hex0x | hex} blob Encrypted message.
+   * @param {buffer | hex0x | hex} readerBlob
+   * @return {any} Decrypted message.
+   */
+  decryptShared(blob, readerBlob) {
+    if (isHex0x(blob) && isHex0x(readerBlob)) {
+      return this.decryptShared(hex0xToBuffer(blob), hex0xToBuffer(readerBlob))
+    }
+    const secret = hex0xToBuffer(this.decrypt(readerBlob))
+    const value = this.decryptSymmetric(blob, secret)
+    return value
+  }
+
+  /**
+   * Generates encrypted secret for other reader.
+   *
+   * @param {buffer | hex0x | hex} readerBlob Encrypted secret readable by `this`.
+   * @param {buffer | hex0x | hex} publicKey Remote public key that the secret is shared with.
+   * @return {typeof readerBlob} Encrypted secret readable by `publicKey` owner.
+   */
+  shareSecret(readerBlob, publicKey) {
+    const secret = this.decrypt(readerBlob)
+    const otherReaderBlob = this.encrypt(secret, publicKey)
+    return otherReaderBlob
   }
 
 }

@@ -10,7 +10,6 @@ const Mnemonic = require('bitcore-mnemonic')
 const EthereumBip44 = require('./ethereum-bip44')
 const util = require('ethereumjs-util')
 const { encrypt, decrypt } = require('./asymmetric-encryption')
-const symmetric = require('./symmetric-encryption')
 const secp256k1 = require('secp256k1')
 const assert = require('assert')
 
@@ -18,6 +17,8 @@ const areAddressesEqual = require('./core/are-addresses-equal')
 const bufferToHex0x = require('./core/buffer-to-hex0x')
 const bufferToKeccak256 = require('./core/buffer-to-keccak256')
 const callHash = require('./core/call-hash')
+const decryptSymmetric = require('./core/decrypt-symmetric')
+const encryptSymmetric = require('./core/encrypt-symmetric')
 const hex0xToBuffer = require('./core/hex0x-to-buffer')
 const isBuffer = require('./core/is-buffer')
 const isHex0x = require('./core/is-hex0x')
@@ -238,40 +239,51 @@ class BPrivacy {
     return BPrivacy.decrypt(input, this.pvtKey)
   }
 
-  // Symmetric encryption.
-  //
-  // @param value {any} Any json-serializable input.
-  // @param secret {Buffer(32)} Secret key, usually `crypto.randomBytes(32)`.
-  // @return blob {Buffer(16 + n)} Returns iv (16 bytes) + encrypted data blob.
-  static encryptSymmetric(value, secret) {
-    return symmetric.encrypt(value, secret)
+  /**
+   * @see encryptSymmetric
+   */
+  static encryptSymmetric(...args) {
+    return encryptSymmetric(...args)
   }
 
-  // Symmetric decryption.
-  //
-  // @param blob {Buffer(16 + n)} iv (16 bytes) + encrypted data input blob.
-  // @param secret {Buffer(32)} Secret key, usually `crypto.randomBytes(32)`.
-  // @return value {any} Decrypted value.
-  static decryptSymmetric(blob, secret) {
-    return symmetric.decrypt(blob, secret)
+  /**
+   * @see decryptSymmetric
+   */
+  static decryptSymmetric(...args) {
+    return decryptSymmetric(...args)
   }
 
-  // TODO: Remove me.
-  encryptSymmetric(...args) {
-    return BPrivacy.encryptSymmetric(...args)
+  /**
+   * @see callHash
+   */
+  static callHash(...args) {
+    return callHash(...args)
   }
 
-  // TODO: Remove me.
-  decryptSymmetric(...args) {
-    return BPrivacy.decryptSymmetric(...args)
-  }
-
+  /**
+   * Generates call signature from a list of `args`.
+   *
+   * In normal usage the first argument is a function name. More "prefixes" can be used, ie. module name, class name,
+   * etc. - it really doesn't matter as long as the list of arguments match on both sides.
+   *
+   * It's common to use nonce as part of signature to avoid replay attacks.
+   *
+   * @param {any[]} args
+   * @return {hex0x} Signature.
+   */
   callSignature(...args) {
     const hash = callHash(...args)
     const sig = this.ecsign(hash)
     return sig
   }
 
+  /**
+   * Checks if provided signature `sig` for `...args` list of arguments has been created by `this`.
+   *
+   * @param { buffer | hex0x | hex } sig
+   * @param { any[] } args
+   * @return {boolean}
+   */
   verifyCallSignature(sig, ...args) {
     const hash = callHash(...args)
     const address = BPrivacy.ecrecoverAddress(hash, sig)
@@ -288,7 +300,7 @@ class BPrivacy {
    */
   encryptShared(value) {
     const secret = randomBytes(32)
-    const blob = this.encryptSymmetric(value, secret)
+    const blob = encryptSymmetric(value, secret)
     const readerBlob = this.encrypt(bufferToHex0x(secret), this.publicKey)
     return [ blob, readerBlob ]
   }
@@ -305,7 +317,7 @@ class BPrivacy {
       return this.decryptShared(hex0xToBuffer(blob), hex0xToBuffer(readerBlob))
     }
     const secret = hex0xToBuffer(this.decrypt(readerBlob))
-    const value = this.decryptSymmetric(blob, secret)
+    const value = decryptSymmetric(blob, secret)
     return value
   }
 

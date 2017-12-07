@@ -2,6 +2,7 @@
 const crypto = require('crypto')
 const randomBytes = require('./random-bytes')
 const bytesToBuffer = require('./bytes-to-buffer')
+const jsonToString = require('./json-to-string')
 
 /**
  * Encrypts `value` using symmetric encryption `.algo` with provided `secret`.
@@ -15,7 +16,7 @@ function encryptSymmetric(value, secret_, { algo = 'aes-256-cbc' } = {}) {
   if (secret.length !== 32) {
     throw new TypeError(`Expected 32 bytes long secret, got ${secret.length}.`)
   }
-  const json = JSON.stringify(value)
+  const json = jsonToString(value)
   const iv = randomBytes(16)
   const cipher = crypto.createCipheriv(algo, secret, iv)
   const encrypted = Buffer.concat([

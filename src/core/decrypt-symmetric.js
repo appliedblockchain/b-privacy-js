@@ -1,6 +1,7 @@
 
 const crypto = require('crypto')
 const bytesToBuffer = require('./bytes-to-buffer')
+const stringToJson = require('./string-to-json')
 
 /**
  * Decrypts `blob_` using `secret_` and symmetric `.algo` (default aes-256-cbc).
@@ -26,7 +27,7 @@ function decryptSymmetric(blob_, secret_, { algo = 'aes-256-cbc' } = {}) {
     decipher.update(encrypted),
     decipher.final()
   ])
-  const json = JSON.parse(decrypted.toString('utf8'))
+  const json = stringToJson(decrypted.toString('utf8'))
   return json
 }
 

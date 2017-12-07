@@ -2,7 +2,9 @@
 const assert = require('assert')
 const elliptic = require('elliptic')
 const crypto = require('crypto')
-const { toBuffer } = require('./core')
+const bytesToBuffer = require('./core/bytes-to-buffer')
+const stringToJson = require('./core/string-to-json')
+const jsonToString = require('./core/json-to-string')
 
 const debug = require('debug')('b-privacy:asmmetric-encryption')
 
@@ -25,13 +27,13 @@ function kdf(keyMaterial, keyLength) {
 function encrypt(input, _privateKey, _remoteKey) {
 
   // Serialize input.
-  const data = Buffer.from(JSON.stringify(input), 'utf8')
+  const data = Buffer.from(jsonToString(input), 'utf8')
 
   // We'll work on buffer for private key.
-  const privateKey = toBuffer(_privateKey)
+  const privateKey = bytesToBuffer(_privateKey)
 
   // We'll work on buffer for remote public key.
-  const remoteKey = toBuffer(_remoteKey)
+  const remoteKey = bytesToBuffer(_remoteKey)
 
   // Make sure we've got x and y in public key.
   // TODO: Double check if this is correct, I believe you can derive y from x. [mr]
@@ -79,7 +81,7 @@ function encrypt(input, _privateKey, _remoteKey) {
 function decrypt(input, privateKey) {
 
   // Let's work on buffer.
-  const data = toBuffer(input)
+  const data = bytesToBuffer(input)
 
   const publicKey = data.slice(0, 65)
 
@@ -106,7 +108,7 @@ function decrypt(input, privateKey) {
     decipher.update(encryptedData),
     decipher.final()
   ])
-  return JSON.parse(decrypted.toString('utf8'))
+  return stringToJson(decrypted.toString('utf8'))
 }
 
 module.exports = {

@@ -1,20 +1,21 @@
 const B = require('../src/b-privacy.js')
-const toHex0x = require('../src/core/to-hex0x')
-const bufferToHex0x = require('../src/core/buffer-to-hex0x')
-const hex0xToBuffer = require('../src/core/hex0x-to-buffer')
 const { t, f } = require('./helpers')
-const randomBytes = require('../src/core/random-bytes')
-const utf8ToKeccak256 = require('../src/core/utf8-to-keccak256')
 const debug = require('debug')('b-privacy:test')
+
+const areBuffersEqual = require('../src/core/are-buffers-equal')
+const makeMnemonic = require('../src/core/make-mnemonic')
+const randomBytes = require('../src/core/random-bytes')
+const toHex0x = require('../src/core/to-hex0x')
+const utf8ToKeccak256 = require('../src/core/utf8-to-keccak256')
 
 const examplePhrase = 'aspect else project orient seed doll admit remind library turkey dutch inhale'
 
 describe('B', function () {
 
   it('initializes when given a valid mnemonic', () => {
-    const mnemonic = B.generateMnemonicPhrase()
+    const mnemonic = makeMnemonic()
     const b = new B({ mnemonic })
-    t(b.mnemonicKey.phrase, mnemonic)
+    t(b.mnemonic, mnemonic)
   })
 
   it('should fail when given a invalid mnemonic', () => {
@@ -23,9 +24,9 @@ describe('B', function () {
   })
 
   it('derives a mnemonic key when given a phrase', () => {
-    const firstMnemo = B.generateMnemonicPhrase()
+    const firstMnemo = makeMnemonic()
     const bp = new B({mnemonic: firstMnemo})
-    const secondMnemo = B.generateMnemonicPhrase()
+    const secondMnemo = makeMnemonic()
     bp.deriveMnemonic(secondMnemo)
     const derivedMnemo = bp.mnemonicKey.phrase
     t(derivedMnemo != null)
@@ -35,13 +36,13 @@ describe('B', function () {
   })
 
   it('generates a 12 work mnemoic phrase', () => {
-    const phrase = B.generateMnemonicPhrase()
+    const phrase = makeMnemonic()
     t(phrase != null)
     t(phrase.split(/\s+/).length, 12, '12 words phrase.')
   })
 
   it('derives the first private key, public key and address', () => {
-    const mnemonic = B.generateMnemonicPhrase()
+    const mnemonic = makeMnemonic()
     const bp = new B({ mnemonic })
     const key = bp.pvtKey
     t(key != null)
@@ -66,7 +67,7 @@ describe('B', function () {
   })
 
   it('exposes sha3', () => {
-    const mnemonic = B.generateMnemonicPhrase()
+    const mnemonic = makeMnemonic()
     const bp = new B({ mnemonic })
     const hash = bp.sha3('message123')
     const expectedHash = 'd860e63c5c69590c1a3184336cafdcd5ea84111b78268e71ed9a623d45be37fa'
@@ -121,10 +122,10 @@ describe('B', function () {
     const secret = randomBytes(32)
     const msg = { hello: 'world' }
     const blob = B.encryptSymmetric(msg, secret)
-    const readerBlob = b.encrypt(bufferToHex0x(secret), b.publicKey)
+    const readerBlob = b.encrypt(secret, b.publicKey)
     debug('b.encrypt -> readerBlob', readerBlob)
-    const decryptedSecret = hex0xToBuffer(b.decrypt(readerBlob))
-    t(toHex0x(decryptedSecret), toHex0x(secret))
+    const decryptedSecret = b.decrypt(readerBlob)
+    t(areBuffersEqual(decryptedSecret, secret))
     const decryptedMsg = B.decryptSymmetric(blob, secret)
     t(decryptedMsg, msg)
   })
@@ -132,7 +133,7 @@ describe('B', function () {
   describe('call sig', () => {
 
     it('should create call signature', () => {
-      const a = new B({ mnemonic: B.generateMnemonicPhrase() })
+      const a = new B({ mnemonic: makeMnemonic() })
       const b = new B({ mnemonic: examplePhrase })
       const args = ['foo', 'hello', true, 42]
       const sig = b.callSignature(...args)
@@ -157,8 +158,8 @@ describe('B', function () {
   describe('encryption for sharing', () => {
 
     it('should work', () => {
-      const a = new B({ mnemonic: B.generateMnemonicPhrase() })
-      const b = new B({ mnemonic: B.generateMnemonicPhrase() })
+      const a = B.generate()
+      const b = B.generate()
 
       const [ blob, aReaderBlob ] = a.encryptShared({ hello: 'world' })
       t(a.decryptShared(blob, aReaderBlob), { hello: 'world' })

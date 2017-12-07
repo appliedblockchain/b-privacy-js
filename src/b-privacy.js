@@ -125,6 +125,15 @@ class BPrivacy {
   }
 
   /**
+   * Returns this account's mnemonic.
+   *
+   * @return {string}
+   */
+  get mnemonic() {
+    return this.mnemonicKey ? this.mnemonicKey.phrase : null
+  }
+
+  /**
    * Returns private key as buffer. Use `getPrivateKey` if you want to get other format directly.
    *
    * @see getPrivateKey

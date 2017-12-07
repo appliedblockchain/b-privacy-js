@@ -1,6 +1,7 @@
 
 const assert = require('assert')
 const isBuffer = require('./is-buffer')
+const kindOf = require('./kind-of')
 
 /**
  * Checks if buffers are byte-to-byte equal.
@@ -10,8 +11,8 @@ const isBuffer = require('./is-buffer')
  * @return {boolean}
  */
 function areBuffersEqual(value, otherValue) {
-  assert(isBuffer(value))
-  assert(isBuffer(otherValue))
+  assert(isBuffer(value), `Invalid value type ${kindOf(value)}, expected buffer.`)
+  assert(isBuffer(otherValue), `Invalid other value type ${kindOf(otherValue)}, expected buffer.`)
   return value.equals(otherValue)
 }
 

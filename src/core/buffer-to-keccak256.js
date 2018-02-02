@@ -9,7 +9,7 @@ const keccak = require('keccak')
  * @return {buffer} 32 bytes
  */
 function bufferToKeccak256(value) {
-  assert(Buffer.isBuffer(value), `Expected Buffer, got ${typeof buf}.`)
+  assert(Buffer.isBuffer(value), `Expected Buffer, got ${typeof value}.`)
   return keccak('keccak256').update(value).digest()
 }
 

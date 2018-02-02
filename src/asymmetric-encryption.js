@@ -1,7 +1,7 @@
 
 const assert = require('assert')
 const elliptic = require('elliptic')
-const crypto = require('crypto')
+const Crypto = require('crypto')
 const bytesToBuffer = require('./core/bytes-to-buffer')
 const stringToJson = require('./core/string-to-json')
 const jsonToString = require('./core/json-to-string')
@@ -18,7 +18,7 @@ function kdf(keyMaterial, keyLength) {
   for (let counter = 0, tmp = Buffer.allocUnsafe(4); counter <= reps;) {
     counter += 1
     tmp.writeUInt32BE(counter)
-    buffers.push(crypto.createHash('sha256').update(tmp).update(keyMaterial).digest())
+    buffers.push(Crypto.createHash('sha256').update(tmp).update(keyMaterial).digest())
   }
   return Buffer.concat(buffers).slice(0, keyLength)
 }
@@ -49,19 +49,19 @@ function encrypt(input, _privateKey, _remoteKey) {
 
   const key = kdf(secret, 32)
   const ekey = key.slice(0, 16)
-  const mkey = crypto.createHash('sha256')
+  const mkey = Crypto.createHash('sha256')
     .update(key.slice(16, 32))
     .digest()
 
-  const iv = crypto.randomBytes(16)
-  const cipher = crypto.createCipheriv('aes-128-ctr', ekey, iv)
+  const iv = Crypto.randomBytes(16)
+  const cipher = Crypto.createCipheriv('aes-128-ctr', ekey, iv)
   const encryptedData = Buffer.concat([
     cipher.update(data),
     cipher.final()
   ])
   const ivData = Buffer.concat([ iv, encryptedData ])
 
-  const tag = crypto.createHmac('sha256', mkey)
+  const tag = Crypto.createHmac('sha256', mkey)
     .update(ivData)
     .digest()
 
@@ -95,15 +95,15 @@ function decrypt(input, privateKey) {
 
   const key = kdf(secret, 32)
   const ekey = key.slice(0, 16)
-  const mkey = crypto.createHash('sha256').update(key.slice(16, 32)).digest()
+  const mkey = Crypto.createHash('sha256').update(key.slice(16, 32)).digest()
 
-  const tag2 = crypto.createHmac('sha256', mkey).update(ivData).digest()
+  const tag2 = Crypto.createHmac('sha256', mkey).update(ivData).digest()
   debug('decrypt', { tag, tag2 })
   assert(tag2.equals(tag), 'Tag mismatch.')
 
   const iv = ivData.slice(0, 16)
   const encryptedData = ivData.slice(16)
-  const decipher = crypto.createDecipheriv('aes-128-ctr', ekey, iv)
+  const decipher = Crypto.createDecipheriv('aes-128-ctr', ekey, iv)
   const decrypted = Buffer.concat([
     decipher.update(encryptedData),
     decipher.final()

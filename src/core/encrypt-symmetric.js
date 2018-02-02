@@ -1,5 +1,5 @@
 
-const crypto = require('crypto')
+const Crypto = require('crypto')
 const randomBytes = require('./random-bytes')
 const bytesToBuffer = require('./bytes-to-buffer')
 const jsonToString = require('./json-to-string')
@@ -18,7 +18,7 @@ function encryptSymmetric(value, secret_, { algo = 'aes-256-cbc' } = {}) {
   }
   const json = jsonToString(value)
   const iv = randomBytes(16)
-  const cipher = crypto.createCipheriv(algo, secret, iv)
+  const cipher = Crypto.createCipheriv(algo, secret, iv)
   const encrypted = Buffer.concat([
     cipher.update(json),
     cipher.final()

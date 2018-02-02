@@ -1,5 +1,5 @@
 
-const crypto = require('crypto')
+const Crypto = require('crypto')
 const bytesToBuffer = require('./bytes-to-buffer')
 const stringToJson = require('./string-to-json')
 
@@ -22,7 +22,7 @@ function decryptSymmetric(blob_, secret_, { algo = 'aes-256-cbc' } = {}) {
   }
   const iv = blob.slice(0, 16)
   const encrypted = blob.slice(16)
-  const decipher = crypto.createDecipheriv(algo, secret, iv)
+  const decipher = Crypto.createDecipheriv(algo, secret, iv)
   const decrypted = Buffer.concat([
     decipher.update(encrypted),
     decipher.final()

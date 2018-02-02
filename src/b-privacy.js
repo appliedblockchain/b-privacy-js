@@ -106,12 +106,11 @@ class BPrivacy {
   }
 
   // derive first private key
-  deriveKey() {
+  deriveKey(index = 0) {
 
     // We leave the account bit not used (always set to 0) at the moment - we don't plan to use multiple accounts for
     // now as we just increase the address index.
     const account = 0
-    const index = 0  // starts at zero - we will increment the address index for every key the user needs
     const coinType = 60 // 60 - ethereum - *note4
     const change = 0 // 0 - false - private address
     const pathLevel = `44'/${coinType}'/${account}'/${change}` // *note2

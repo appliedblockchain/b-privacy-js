@@ -8,9 +8,9 @@ Supports:
 * access to mnemonic, private key, public key and ethereum address `[a.mnemonic, a.privateKey, a.publicKey, a.address]`
 * asymmetric encryption `a.encrypt(msg, b.publicKey)`
 * asymmetric decryption `b.decrypt(msg, a.publicKey)`
-* signing `s = a.sign(msg)` (alternatively `s = a.web3Sign(msg)` to get 0x-prefixed, single blob instead of `{ r, s, v }` object in case of `sign`)
-* --verifying signature `b.verify(s, a.publicKey)`--
+* signing `a.ecsign(B.keccak256(msg))`
 * deriving address from public key `B.publicKeyToAddress(publicKey)`
+* See usage for examples
 
 ## Conventions
 
@@ -30,25 +30,59 @@ the same conversions as seen in solidity, ie.:
 
 ## Installation
 
-    npm i -D git+ssh://git@github.com:appliedblockchain/b-privacy-js.git#v0.2.1
+    npm i --save @appliedblockchain/b-privacy
 
 ## Usage
+```js
+const assert = require('assert')
+const B = require('@appliedblockchain/b-privacy')
 
-    const assert = require('assert');
-    const B = require('b-privacy');
+const simon = new B({ mnemonic: B.generateMnemonicPhrase() })
 
-    // Create accounts.
-    const alice = new B({ mnemonic: B.generateMnemonicPhrase() });
-    const bob = new B({ mnemonic: B.generateMnemonicPhrase() });
+// sign a message from an account
+const helloHash = B.keccak256('hello')
+const helloSig = simon.ecsign(helloHash)
 
-    // Alice encrypts a message for Bob.
-    const encrypted = alice.encrypt({ foo: "bar" }, bob.publicKey);
+// verify that i said hello
+const didISayHello = simon.ecverify(helloHash, helloSig)
+assert.equal(didISayHello, true)
 
-    // Bob decrypts message from Alice.
-    assert.deepEqual(
-      bob.decrypt(encrypted, alice.publicKey),
-      { foo: "bar" }
-    );
+// anyone can verify i said hello if they have my publicKey or address
+const recoveredPublicKey = B.ecrecover(helloHash, helloSig)
+assert.equal(recoveredPublicKey, simon.getPublicKey())
+const recoveredAddress = B.ecrecoverAddress(helloHash, helloSig)
+assert.equal(recoveredAddress, simon.address)
+
+const mike = new B({ mnemonic: B.generateMnemonicPhrase() })
+const hiMike = simon.encrypt({
+  message: 'hello',
+  another: 'key'
+}, mike.publicKey)
+
+const mikesMessage = mike.decrypt(hiMike, simon.publicKey)
+assert.deepEqual(mikesMessage, { message: 'hello', another: 'key' })
+
+const helloEveryone = { hello: 'everyone!' }
+const [ sharedBlob, readerBlob ] = simon.encryptShared(helloEveryone)
+
+// i can decrypt my own shared message, other people can't without calling shareSecret
+assert.deepEqual(simon.decryptShared(sharedBlob, readerBlob), helloEveryone)
+
+// providing a mnemonic is optional, if nothing provided then one will be generated
+const bob = new B()
+const bobReaderBlob = simon.shareSecret(readerBlob, bob.publicKey)
+
+// bob can now decrypt the shared message
+const bobsMessage = bob.decryptShared(sharedBlob, bobReaderBlob)
+assert.deepEqual(bobsMessage, helloEveryone)
+
+// bob can now pass the message on securely
+const alice = new B()
+const aliceReaderBlob = bob.shareSecret(bobReaderBlob, alice.publicKey)
+
+const alicesMessage = alice.decryptShared(sharedBlob, aliceReaderBlob)
+assert.deepEqual(alicesMessage, helloEveryone)
+```
 
 For more usage examples please refer to tests in `test` directory.
 
@@ -83,7 +117,7 @@ or:
 
 ### Browser Usage
 
-Please require `dist/b-privacy.iife.js`, that's the browser-ready version.
+Please require `dist/b-privacy.js`, that's the browser-ready version.
 
 You also need to include `bitcore-lib` manually before that. See `test/browser.index.html` for a working example.
 
@@ -94,15 +128,3 @@ To make the example work you need to build bitcore-lib for the browser, run:
     npm i
     gulp browser
 
-
-### Usage
-Storage of the key should be handled
-
-```
-var phrase = BPrivacy.generateMnemonicPhrase(); // "monkey flip moral arrow cannon icon embody muffin ski train cool spray"
-var bp = new BPrivacy({mnemonic: phrase});
-bp.address // "0xe0717674db78370b93af791216c8bbbd871a9091"
-bp.pubKey.toString(); // "030b98a725efa7378398067c79e5d67f6a068dcb2b9ca36f4a19b3557c34955de6"
-bp.pvtKey.toString(); // "ce2d46332c210aae80bffb88df33466b670705b0d244c99cdb235c190d05aa15"
-signed_message = bp.sign("abc") // {r: Uint8Array(32), s: Uint8Array(32), v: 27}
-```

@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "b-privacy",
+  "name": "@appliedblockchain/b-privacy",
   "version": "1.0.0",
   "main": "src/b-privacy.js",
   "eslintConfig": {
@@ -9,6 +9,7 @@
   "dependencies": {
     "bitcore-lib": "^0.15.0",
     "bitcore-mnemonic": "^1.2.5",
+    "debug": "^3.1.0",
     "elliptic": "^6.4.0",
     "ethereumjs-util": "^5.1.2"
   },

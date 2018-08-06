@@ -1,7 +1,12 @@
 {
   "name": "@appliedblockchain/b-privacy",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "main": "lib/b-privacy.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appliedblockchain/b-privacy-js.git"
+  },
+  "license": "UNLICENSED",
   "eslintConfig": {
     "extends": "@appliedblockchain"
   },

@@ -1,0 +1,43 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - restore_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+      - run: npm ci
+      - save_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run: npm test
+
+  publish_to_npm:
+    steps:
+      - checkout
+      - run:
+          name: Authorize NPM
+          command: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
+      - run:
+          name: Publish to NPM
+          command: npm publish || echo "Already published."
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /.*/
+      - publish_to_npm:
+          context: org-global
+          requires:
+            - test
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              ignore: /.*/

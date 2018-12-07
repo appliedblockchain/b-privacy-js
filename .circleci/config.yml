@@ -1,0 +1,64 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - restore_cache:
+          key: node_modules-{{ checksum "package.json" }}
+      - run: npm i
+      - save_cache:
+          key: node_modules-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - persist_to_workspace:
+          root: ~/project
+          paths: .
+  test:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: npm test
+
+  publish_to_npm:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Authorize NPM
+          command: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
+      - run:
+          name: Publish to NPM
+          command: npm publish
+
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+      - test:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+
+      - publish_to_npm:
+          context: org-global
+          requires:
+            - test
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              ignore: /.*/

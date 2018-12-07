@@ -13,7 +13,7 @@ jobs:
           paths:
             - ./node_modules
       - persist_to_workspace:
-          root: ~/project
+          root: ~/project # ~/project is the default working_directory, i.e. steps are run in this directory unless otherwise specified
           paths: .
 
   test:
@@ -23,6 +23,27 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: npm test
+
+  build_client_version:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build client version
+          command: npm run client-build
+      - persist_to_workspace:
+          root: ~/client-build
+          paths: ./dist
+
+  test_client_version:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/client-build
+      - run: cd ~/client-build && npm test
 
   publish_to_npm:
     docker:
@@ -37,18 +58,6 @@ jobs:
           name: Publish to NPM
           command: npm publish
 
-  generate_client_version:
-    docker:
-      - image: circleci/node:10
-    steps:
-      - checkout
-      - run:
-          name: Build client version
-          command: npm run client-build
-      - persist_to_workspace:
-          root: ~/client-build
-          paths: ./dist
-
   publish_client_version_to_npm:
     docker:
       - image: circleci/node:10
@@ -60,7 +69,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
       - run:
           name: Publish to NPM
-          command: npm publish
+          command: cd ~/client-build && npm publish
 
 workflows:
   version: 2
@@ -78,19 +87,25 @@ workflows:
             tags:
               only: /.*/
 
+      - build_client_version:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+
+      - test_client_version:
+          requires:
+            - build_client_version
+          filters:
+            tags:
+              only: /.*/
+
       - publish_to_npm:
           context: org-global
           requires:
             - test
-          filters:
-            tags:
-              only: /^v[0-9]+.*/
-            branches:
-              ignore: /.*/
-
-      - generate_client_version:
-          requires:
-            - test
+            - test_client_version
           filters:
             tags:
               only: /^v[0-9]+.*/
@@ -100,7 +115,7 @@ workflows:
       - publish_client_version_to_npm:
           context: org-global
           requires:
-            - generate_client_version
+            - publish_to_npm
           filters:
             tags:
               only: /^v[0-9]+.*/

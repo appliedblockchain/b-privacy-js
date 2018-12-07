@@ -104,6 +104,16 @@ Package the library for release (browser/node)
 
     npm run build
 
+For client distributions (where the source code is uglified):
+
+    npm run client-build
+    cd /dist
+    npm run publish
+
+Note that the `package.json` is copied from the project root, so any version amendments should be made before publication.
+
+TODO: Optimise publication process; ideally we will not have to manually publish a separate version for the client distribution.
+
 ## Testing
 
     npm test

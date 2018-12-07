@@ -1,7 +1,6 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/repo
     docker:
       - image: circleci/node:10
     steps:
@@ -14,14 +13,14 @@ jobs:
           paths:
             - ./node_modules
       - persist_to_workspace:
-          root: ~/repo
+          root: ~/project
           paths: .
   test:
     docker:
       - image: circleci/node:10
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: ~/project
       - run: npm test
 
   publish_to_npm:
@@ -29,7 +28,7 @@ jobs:
       - image: circleci/node:10
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: ~/project
       - run:
           name: Authorize NPM
           command: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc

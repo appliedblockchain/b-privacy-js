@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  test:
+  build:
     docker:
       - image: circleci/node:10
     steps:
@@ -15,6 +15,8 @@ jobs:
       - run: npm test
 
   publish_to_npm:
+    docker:
+      - image: circleci/node:10
     steps:
       - checkout
       - run:
@@ -28,14 +30,14 @@ workflows:
   version: 2
   main:
     jobs:
-      - test:
+      - build:
           filters:
             tags:
               only: /.*/
       - publish_to_npm:
           context: org-global
           requires:
-            - test
+            - build
           filters:
             tags:
               only: /v.*/

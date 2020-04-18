@@ -15,6 +15,7 @@ jobs:
       - persist_to_workspace:
           root: ~/project
           paths: .
+
   test:
     docker:
       - image: circleci/node:10
@@ -22,6 +23,27 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: npm test
+
+  build_client_version:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build client version
+          command: npm run client-build
+      - persist_to_workspace:
+          root: ~/project
+          paths: ./dist
+
+  test_client_version:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: cd dist && npm test
 
   publish_to_npm:
     docker:
@@ -36,6 +58,18 @@ jobs:
           name: Publish to NPM
           command: npm publish
 
+  publish_client_version_to_npm:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Authorize NPM
+          command: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
+      - run:
+          name: Publish to NPM
+          command: cd dist && npm publish
 
 workflows:
   version: 2
@@ -53,12 +87,37 @@ workflows:
             tags:
               only: /.*/
 
+      - build_client_version:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+
+      - test_client_version:
+          requires:
+            - build_client_version
+          filters:
+            tags:
+              only: /.*/
+
       - publish_to_npm:
           context: org-global
           requires:
             - test
+            - test_client_version
           filters:
             tags:
-              only: /v.*/
+              only: /^v[0-9]+.*/
+            branches:
+              ignore: /.*/
+    
+      - publish_client_version_to_npm:
+          context: org-global
+          requires:
+            - publish_to_npm
+          filters:
+            tags:
+              only: /^v[0-9]+.*/
             branches:
               ignore: /.*/
